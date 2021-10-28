@@ -2,6 +2,7 @@ package admins
 
 import (
 	"altaStore/api/common"
+	"altaStore/api/middleware"
 	"altaStore/api/v1/admins/response"
 	"altaStore/business/admins"
 	"strconv"
@@ -55,7 +56,9 @@ func (admin_service *Controller) GetAdminByUsername(c echo.Context) error {
 func (admin_service *Controller) CreateAdminController(c echo.Context) error {
 	admin_spec := admins.AdminSpec{}
 	c.Bind(&admin_spec)
-	err := admin_service.adminService.InsertAdmin(admin_spec, c.FormValue("created_by"))
+
+	username_admin := middleware.ExtractTokenKey(c, "username").(string)
+	err := admin_service.adminService.InsertAdmin(admin_spec, username_admin)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
@@ -65,7 +68,8 @@ func (admin_service *Controller) CreateAdminController(c echo.Context) error {
 func (admin_service *Controller) ModifyAdminController(c echo.Context) error {
 	admin_updatable := admins.AdminUpdatable{}
 	c.Bind(&admin_updatable)
-	err := admin_service.adminService.ModifyAdmin(c.Param("username"), admin_updatable)
+	username_admin := middleware.ExtractTokenKey(c, "username").(string)
+	err := admin_service.adminService.ModifyAdmin(c.Param("username"), admin_updatable, username_admin)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}

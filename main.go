@@ -65,7 +65,6 @@ func newDatabaseConnection(config *config.AppConfig) *gorm.DB {
 func main() {
 	//load config if available or set to default
 	config := config.GetConfig()
-	fmt.Println(config)
 
 	//initialize database connection based on given config
 	dbConnection := newDatabaseConnection(config)
@@ -89,7 +88,9 @@ func main() {
 
 	// run server
 	go func() {
-		address := fmt.Sprintf("localhost:%d", config.AppPort)
+		// address := fmt.Sprintf("localhost:%d", config.AppPort)
+		address := fmt.Sprintf(":%d", config.AppPort)
+		fmt.Println(address)
 		if err := e.Start(address); err != nil {
 			log.Info("shutting down the server")
 		}

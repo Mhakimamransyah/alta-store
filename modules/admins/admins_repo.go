@@ -21,8 +21,8 @@ type AdminsTable struct {
 	Email        string    `gorm:"email;type:varchar(30);unique;not null"`
 	Phone_number string    `gorm:"phone_number;type:varchar(20);not null"`
 	Username     string    `gorm:"username;type:varchar(10);uniqueIndex:username,sort:asc;not null"`
-	Created_by   string    `gorm:"created_by"`
-	Modified_by  string    `gorm:"modified_by"`
+	Created_by   string    `gorm:"created_by;default:null"`
+	Modified_by  string    `gorm:"modified_by;default:null"`
 	Created_at   time.Time `gorm:"created_at;type:datetime;default:null"`
 	Updated_at   time.Time `gorm:"updated_at;type:datetime;default:null"`
 	Deleted_at   time.Time `gorm:"deleted_at;type:datetime;default:null"`

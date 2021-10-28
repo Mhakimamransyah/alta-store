@@ -14,4 +14,7 @@ var (
 
 	//ErrInvalidSpec Error when data given is not valid on update or insert
 	ErrInvalidSpec = errors.New("Given spec is not valid")
+
+	// ErrUnauthorized Error when users try to modify / deleted data that not belongs to him
+	ErrUnauthorized = errors.New("Unauthorized action")
 )

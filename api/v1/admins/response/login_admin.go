@@ -47,6 +47,7 @@ func createToken(admin *admins.Admins) (string, error) {
 		"timestamp":  time.Now(),
 		"exp":        time.Now().Add(time.Hour * 1).Unix(),
 		"name":       admin.Name,
+		"username":   admin.Username,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

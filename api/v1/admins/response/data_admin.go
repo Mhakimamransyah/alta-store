@@ -5,6 +5,7 @@ import "altaStore/business/admins"
 type DataAdmin struct {
 	Name string
 	// Status       string
+	ID           int
 	Email        string
 	Phone_number string
 	Username     string
@@ -14,6 +15,7 @@ func ConvertAdminToDataAdmin(admin *admins.Admins) *DataAdmin {
 	return &DataAdmin{
 		Name: admin.Name,
 		// Status:       admin.Status,
+		ID:           admin.ID,
 		Username:     admin.Username,
 		Email:        admin.Email,
 		Phone_number: admin.Phone_number,

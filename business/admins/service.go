@@ -14,14 +14,12 @@ type AdminSpec struct {
 	Email        string `form:"email" validate:"required,email"`
 	Phone_number string `form:"phone_number" validate:"required,max=20"`
 	Username     string `form:"username" validate:"required,max=10"`
-	CreatedBy    string `form:"created_by" validate:"required"`
 }
 
 type AdminUpdatable struct {
 	Name         string `json:"name" form:"name" validate:"required,max=20"`
 	Phone_number string `json:"phone_number" form:"phone_number" validate:"required,max=20"`
 	Status       string `json:"status" form:"status" validate:"max=10"`
-	Modified_by  string `json:"modified_by" form:"modified_by" validate:"required"`
 }
 
 type service struct {
@@ -84,7 +82,7 @@ func (admin_service *service) InsertAdmin(admin_spec AdminSpec, createdBy string
 		admin_spec.Email,
 		string(hashedPassword),
 		admin_spec.Phone_number,
-		admin_spec.CreatedBy,
+		createdBy,
 	)
 
 	err = admin_service.AdminsRepository.CreateAdmin(&admin)
@@ -94,7 +92,7 @@ func (admin_service *service) InsertAdmin(admin_spec AdminSpec, createdBy string
 	return nil
 }
 
-func (admin_service *service) ModifyAdmin(username string, admin_updatable AdminUpdatable) error {
+func (admin_service *service) ModifyAdmin(username string, admin_updatable AdminUpdatable, modifiedBy string) error {
 	err := validator.GetValidator().Struct(admin_updatable)
 	if err != nil {
 		return err
@@ -106,7 +104,7 @@ func (admin_service *service) ModifyAdmin(username string, admin_updatable Admin
 	}
 
 	fmt.Println(admin_data)
-	new_admin_data := admin_data.ModifyAdmin(admin_updatable)
+	new_admin_data := admin_data.ModifyAdmin(admin_updatable, modifiedBy)
 	err = admin_service.AdminsRepository.UpdateAdmin(&new_admin_data)
 	if err != nil {
 		return err

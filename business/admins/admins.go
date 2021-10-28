@@ -4,10 +4,9 @@ import "time"
 
 // Admins data core
 type Admins struct {
-	ID     int
-	Name   string
-	Status string
-	// Password     string
+	ID           int
+	Name         string
+	Status       string
 	Email        string
 	Phone_number string
 	Username     string
@@ -40,7 +39,7 @@ func NewAdmin(
 	}
 }
 
-func (old_admin *Admins) ModifyAdmin(new_data AdminUpdatable) Admins {
+func (old_admin *Admins) ModifyAdmin(new_data AdminUpdatable, modifiedBy string) Admins {
 	return Admins{
 		ID:           old_admin.ID,
 		Status:       new_data.Status,
@@ -49,7 +48,7 @@ func (old_admin *Admins) ModifyAdmin(new_data AdminUpdatable) Admins {
 		Phone_number: new_data.Phone_number,
 		Username:     old_admin.Username,
 		CreatedBy:    old_admin.CreatedBy,
-		Modified_by:  new_data.Modified_by,
+		Modified_by:  modifiedBy,
 		Created_at:   old_admin.Created_at,
 		Updated_at:   time.Now(),
 	}
