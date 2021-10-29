@@ -21,9 +21,8 @@ func NewController(service cart.Service) *Controller {
 	}
 }
 
-// InsertAddress Create new address handler
+// AddToCart Create new active cart or just add new product to the cart_detail
 func (controller *Controller) AddToCart(c echo.Context) error {
-
 	user := c.Get("user").(*jwt.Token)
 	if !user.Valid {
 		return c.JSON(common.NewForbiddenResponse())
@@ -51,4 +50,28 @@ func (controller *Controller) AddToCart(c echo.Context) error {
 	}
 
 	return c.JSON(common.NewSuccessResponseWithoutData())
+}
+
+// GetActiveCart get active cart with all cart details
+func (controller *Controller) GetActiveCart(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	if !user.Valid {
+		return c.JSON(common.NewForbiddenResponse())
+	}
+
+	claims := user.Claims.(jwt.MapClaims)
+
+	//use float64 because its default data that provide by JWT, we cant use int/int32/int64/etc.
+	//MUST CONVERT TO FLOAT64, OTHERWISE ERROR (not _ok_)!
+	userID, ok := claims["id"].(float64)
+	if !ok {
+		return c.JSON(common.NewForbiddenResponse())
+	}
+
+	activeCart, err := controller.service.GetActiveCart(uint(userID))
+	if err != nil {
+		return c.JSON(common.NewErrorBusinessResponse(err))
+	}
+
+	return c.JSON(common.NewSuccessResponse(activeCart))
 }

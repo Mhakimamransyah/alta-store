@@ -1,6 +1,8 @@
 package cart
 
-import "time"
+import (
+	"time"
+)
 
 type Cart struct {
 	ID        uint
@@ -21,6 +23,20 @@ type CartDetail struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time
+}
+
+type ActiveCart struct {
+	CartID      uint
+	Status      string
+	AddressID   *uint
+	CartDetails []ActiveCartDetail
+}
+
+type ActiveCartDetail struct {
+	ID        uint
+	ProductID uint
+	Price     uint
+	Quantity  uint
 }
 
 //NewCart create new Cart
@@ -55,5 +71,29 @@ func NewCartDetail(
 		CreatedAt: createdAt,
 		UpdatedAt: time.Now(),
 		DeletedAt: nil,
+	}
+}
+
+//MergeCart merge ActiveCart and ActiveCartDetail
+func MergeCart(
+	cartID uint,
+	status string,
+	addressID *uint,
+	cartDetails []ActiveCartDetail) ActiveCart {
+	return ActiveCart{
+		CartID:      cartID,
+		Status:      status,
+		AddressID:   addressID,
+		CartDetails: cartDetails,
+	}
+}
+
+//ToActiveCartDetail bind CartDetail struct to ActiveCartDetail struct
+func ToActiveCartDetail(cartDetail CartDetail) ActiveCartDetail {
+	return ActiveCartDetail{
+		ID:        cartDetail.ID,
+		ProductID: cartDetail.ProductID,
+		Price:     cartDetail.Price,
+		Quantity:  cartDetail.Quantity,
 	}
 }

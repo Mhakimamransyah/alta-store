@@ -24,9 +24,9 @@ func RegisterPath(
 	// 	//authentication with Versioning endpoint
 	authV1 := e.Group("v1/auth")
 	authV1.POST("/login", authController.Login)
+	authV1.POST("/register", userController.InsertUser)
 
 	//user with Versioning endpoint
-	e.POST("v1/users", userController.InsertUser)
 	userV1 := e.Group("v1/users")
 	userV1.Use(middleware.JWTMiddleware())
 	userV1.GET("/:id", userController.FindUserByID)
@@ -38,6 +38,7 @@ func RegisterPath(
 	cartV1 := e.Group("v1/cart")
 	cartV1.Use(middleware.JWTMiddleware())
 	cartV1.POST("", cartController.AddToCart)
+	cartV1.GET("", cartController.GetActiveCart)
 
 	// 	userV1.PUT("/:id", userController.UpdateUser)
 

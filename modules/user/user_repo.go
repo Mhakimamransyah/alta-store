@@ -56,6 +56,12 @@ func (col *User) ToUser() user.User {
 //NewGormDBRepository Generate Gorm DB user repository
 func NewGormDBRepository(db *gorm.DB) *GormRepository {
 	return &GormRepository{
+		db.Where("deleted_at is null"),
+	}
+}
+
+func NewGormDBRepositoryWithDeleted(db *gorm.DB) *GormRepository {
+	return &GormRepository{
 		db,
 	}
 }
@@ -109,7 +115,6 @@ func (repo *GormRepository) FindAllUser(skip int, rowPerPage int) ([]user.User, 
 
 //InsertUser Insert new User into storage
 func (repo *GormRepository) InsertUser(user user.User) error {
-
 	userData := newUserTable(user)
 	userData.ID = 0
 

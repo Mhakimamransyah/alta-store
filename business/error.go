@@ -17,4 +17,10 @@ var (
 
 	//ErrLogin Error when email or password is wrong
 	ErrLogin = errors.New("Email or password is incorrect")
+
+	//ErrRegister Error if duplicate email
+	ErrRegister = errors.New("Email already registered")
+
+	//ErrAddToCart Error invalid on do parameter
+	ErrAddToCart = errors.New("Product not found, cannot use subtraction")
 )

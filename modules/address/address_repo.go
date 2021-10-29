@@ -73,6 +73,12 @@ func (col *Address) ToAddress() address.Address {
 //NewGormDBRepository Generate Gorm DB user repository
 func NewGormDBRepository(db *gorm.DB) *GormRepository {
 	return &GormRepository{
+		db.Where("deleted_at is null"),
+	}
+}
+
+func NewGormDBRepositoryWithDeleted(db *gorm.DB) *GormRepository {
+	return &GormRepository{
 		db,
 	}
 }

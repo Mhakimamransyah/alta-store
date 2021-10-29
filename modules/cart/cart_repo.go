@@ -18,7 +18,7 @@ type Cart struct {
 	AddressID *uint  `json:"address_id"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt *time.Time
+	DeletedAt *time.Time `soft_delete.DeletedAt`
 }
 
 type CartDetail struct {
@@ -68,6 +68,12 @@ func NewGormDBRepository(db *gorm.DB) *GormRepository {
 	}
 }
 
+func NewGormDBRepositoryWithDeleted(db *gorm.DB) *GormRepository {
+	return &GormRepository{
+		db,
+	}
+}
+
 func (col *Cart) CartToService() cart.Cart {
 	var cart cart.Cart
 
@@ -100,14 +106,14 @@ func (col *CartDetail) CartDetailToService() cart.CartDetail {
 func (repo *GormRepository) GetActiveCart(UserID uint) (*cart.Cart, error) {
 	var cartData Cart
 
-	err := repo.DB.Where("user_id = ?", UserID).Where("status = ?", "active").First(&cartData).Error
+	err := repo.DB.Where("user_id = ?", UserID).Where("status = ?", "active").Where("deleted_at is null").First(&cartData).Error
 	if err != nil {
 		return nil, err
 	}
 
-	user := cartData.CartToService()
+	activecart := cartData.CartToService()
 
-	return &user, nil
+	return &activecart, nil
 }
 
 func (repo *GormRepository) CreateCart(cart cart.Cart) error {
@@ -130,6 +136,54 @@ func (repo *GormRepository) InsertCartDetail(cartDetail cart.CartDetail) error {
 	err := repo.DB.Create(cartDetailData).Error
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (repo *GormRepository) GetCartDetailByCartID(CartID uint) ([]cart.CartDetail, error) {
+	var cartdetails []CartDetail
+
+	err := repo.DB.Where("cart_id = ?", CartID).Where("deleted_at is null").Find(&cartdetails).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var result []cart.CartDetail
+	for _, value := range cartdetails {
+		result = append(result, value.CartDetailToService())
+	}
+
+	return result, nil
+}
+
+func (repo *GormRepository) FindProductOnCartDetail(cartID, productID uint) (*cart.CartDetail, error) {
+
+	var cartDetailData CartDetail
+
+	err := repo.DB.Where("cart_id = ?", cartID).Where(" product_id = ?", productID).Where("deleted_at is null").First(&cartDetailData).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	cartDetail := cartDetailData.CartDetailToService()
+
+	return &cartDetail, nil
+
+}
+
+func (repo *GormRepository) UpdateQuantity(cartID, productID, qty uint) error {
+	if qty != 0 {
+		err := repo.DB.Model(&CartDetail{}).Where("cart_id = ?", cartID).Where("product_id = ?", productID).Where("deleted_at is null").Update("quantity", qty).Error
+		if err != nil {
+			return err
+		}
+	} else {
+		err := repo.DB.Model(&CartDetail{}).Where("cart_id = ?", cartID).Where("product_id = ?", productID).Where("deleted_at is null").Update("deleted_at", time.Now()).Error
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

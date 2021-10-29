@@ -68,7 +68,7 @@ func (s *service) InsertUser(insertUserSpec InsertUserSpec) error {
 
 	err = s.repository.InsertUser(user)
 	if err != nil {
-		return err
+		return business.ErrRegister
 	}
 
 	return nil
