@@ -1,6 +1,7 @@
 package cart_test
 
 import (
+	"altaStore/business"
 	"altaStore/business/cart"
 	cartMock "altaStore/business/cart/mocks"
 	"os"
@@ -23,9 +24,9 @@ const (
 var (
 	cartService    cart.Service
 	cartRepository cartMock.Repository
-
-	cartData      cart.Cart
-	addToCartData cart.AddToCartSpec
+	cartData       cart.Cart
+	cartDetailData cart.CartDetail
+	addToCartData  cart.AddToCartSpec
 )
 
 func TestMain(m *testing.M) {
@@ -35,13 +36,18 @@ func TestMain(m *testing.M) {
 
 func TestAddToCart(t *testing.T) {
 	t.Run("Expect add to cart success", func(t *testing.T) {
-		cartRepository.On("AddToCart", mock.AnythingOfType("cart.AddToCartSpec")).Return(nil).Once()
+		cartRepository.On("GetActiveCart", uint(userID)).Return(nil, business.ErrInternalServerError).Once()
+		cartRepository.On("CreateCart", mock.AnythingOfType("cart.Cart")).Return(nil).Once()
+		cartRepository.On("GetActiveCart", uint(userID)).Return(&cartData, nil).Once()
+		cartRepository.On("FindProductOnCartDetail", mock.AnythingOfType("uint"), mock.AnythingOfType("uint")).Return(nil, business.ErrInternalServerError).Once()
+		cartRepository.On("InsertCartDetail", mock.AnythingOfType("cart.CartDetail")).Return(nil).Once()
 
 		err := cartService.AddToCart(addToCartData)
 
 		assert.Nil(t, err)
 
 	})
+
 }
 
 func setup() {
