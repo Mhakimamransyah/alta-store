@@ -12,6 +12,9 @@ const (
 	errHasBeenModified     errorBusinessResponseCode = "data_has_been modified"
 	errNotFound            errorBusinessResponseCode = "data_not_found"
 	errInvalidSpec         errorBusinessResponseCode = "invalid_spec"
+	errLogin               errorBusinessResponseCode = "unauthorize"
+	errRegister            errorBusinessResponseCode = "conflict"
+	ErrAddToCart           errorBusinessResponseCode = "invalid_spec"
 )
 
 //BusinessResponse default payload response
@@ -37,6 +40,12 @@ func errorMapping(err error) (int, BusinessResponse) {
 		return newValidationResponse(err.Error())
 	case business.ErrHasBeenModified:
 		return newHasBeedModifiedResponse()
+	case business.ErrLogin:
+		return newErrorLogin(err.Error())
+	case business.ErrRegister:
+		return newErrorRegister(err.Error())
+	case business.ErrAddToCart:
+		return newErrorRegister(err.Error())
 	}
 }
 
@@ -72,6 +81,33 @@ func newValidationResponse(message string) (int, BusinessResponse) {
 	return http.StatusBadRequest, BusinessResponse{
 		errInvalidSpec,
 		"Validation failed " + message,
+		map[string]interface{}{},
+	}
+}
+
+//newErrorLogin failed to Login
+func newErrorLogin(message string) (int, BusinessResponse) {
+	return http.StatusUnauthorized, BusinessResponse{
+		errLogin,
+		message,
+		map[string]interface{}{},
+	}
+}
+
+//newErrorRegister failed to Login
+func newErrorRegister(message string) (int, BusinessResponse) {
+	return http.StatusConflict, BusinessResponse{
+		errRegister,
+		message,
+		map[string]interface{}{},
+	}
+}
+
+//newErrorRegister failed to Login
+func newErrorAddToCart(message string) (int, BusinessResponse) {
+	return http.StatusBadRequest, BusinessResponse{
+		ErrAddToCart,
+		message,
 		map[string]interface{}{},
 	}
 }

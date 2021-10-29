@@ -15,6 +15,15 @@ var (
 	//ErrInvalidSpec Error when data given is not valid on update or insert
 	ErrInvalidSpec = errors.New("Given spec is not valid")
 
+	//ErrLogin Error when email or password is wrong
+	ErrLogin = errors.New("Email or password is incorrect")
+
+	//ErrRegister Error if duplicate email
+	ErrRegister = errors.New("Email already registered")
+
+	//ErrAddToCart Error invalid on do parameter
+	ErrAddToCart = errors.New("Product not found, cannot use subtraction")
+
 	// ErrUnauthorized Error when users try to modify / deleted data that not belongs to him
 	ErrUnauthorized = errors.New("Unauthorized action")
 )

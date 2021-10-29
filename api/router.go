@@ -2,20 +2,51 @@ package api
 
 import (
 	"altaStore/api/middleware"
+	"altaStore/api/v1/address"
 	"altaStore/api/v1/admins"
+	"altaStore/api/v1/auth"
+	"altaStore/api/v1/cart"
 	"altaStore/api/v1/categories"
 	"altaStore/api/v1/products"
+	"altaStore/api/v1/user"
 
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v4"
 )
 
-func RegisterPath(e *echo.Echo,
+//RegisterPath Register all API with routing path
+func RegisterPath(
+	e *echo.Echo,
+	authController *auth.Controller,
+	userController *user.Controller,
+	addressController *address.Controller,
+	cartController *cart.Controller,
 	adminController *admins.Controller,
 	categoriesController *categories.Controller,
-	productsController *products.Controller,
-) {
+	productsController *products.Controller) {
+	// if authController == nil || userController == nil || addressController == nil || cartController == nil {
+	// 	panic("Controller parameter cannot be nil")
+	// }
+
+	// 	//authentication with Versioning endpoint
+	authV1 := e.Group("v1/auth")
+	authV1.POST("/login", authController.Login)
+	authV1.POST("/register", userController.InsertUser)
+
+	//user with Versioning endpoint
+	userV1 := e.Group("v1/users")
+	userV1.Use(middleware.JWTMiddleware())
+	userV1.GET("/:id", userController.FindUserByID)
+	userV1.GET("", userController.FindAllUser)
+	userV1.POST("/address", addressController.InsertAddress)
+	userV1.GET("/address", addressController.GetAllAddress)
+	userV1.GET("/address/default", addressController.GetDefaultAddress)
+
+	cartV1 := e.Group("v1/cart")
+	cartV1.Use(middleware.JWTMiddleware())
+	cartV1.POST("", cartController.AddToCart)
+	cartV1.GET("", cartController.GetActiveCart)
 
 	e.POST("admins/login", adminController.LoginController)
 	e.POST("adminmockdata", adminController.CreateMockAdminController)
