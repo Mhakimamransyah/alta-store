@@ -3,19 +3,18 @@ package config
 import (
 	"sync"
 
-	"github.com/joho/godotenv"
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/viper"
 )
 
-type ConfigIPForwarding struct {
+type ExampleConfigIPForwarding struct {
 	Enabled bool   `mapstructure:"enabled"`
 	IP      string `mapstructure:"ip"`
 	Port    string `mapstructure:"port"`
 }
 
 //AppConfig Application configuration
-type AppConfig struct {
+type ExampleAppConfig struct {
 	AppPort        int    `mapstructure:"app_port"`
 	AppEnvironment string `mapstructure:"app_environment"`
 	DbDriver       string `mapstructure:"db_driver"`
@@ -26,33 +25,31 @@ type AppConfig struct {
 	DbName         string `mapstructure:"db_name"`
 }
 
-var lock = &sync.Mutex{}
-var appConfig *AppConfig
+var examplelock = &sync.Mutex{}
+var exampleappConfig *ExampleAppConfig
 
 //GetConfig Initiatilize config in singleton way
-func GetConfig() *AppConfig {
-	if appConfig != nil {
-		return appConfig
+func ExampleGetConfig() *ExampleAppConfig {
+	if exampleappConfig != nil {
+		return exampleappConfig
 	}
 
-	lock.Lock()
-	defer lock.Unlock()
+	examplelock.Lock()
+	defer examplelock.Unlock()
 
 	//re-check after locking
-	if appConfig != nil {
-		return appConfig
+	if exampleappConfig != nil {
+		return exampleappConfig
 	}
 
-	appConfig = initConfig()
+	exampleappConfig = exampleinitConfig()
 
-	return appConfig
+	return exampleappConfig
 }
 
-func initConfig() *AppConfig {
-	godotenv.Load(".env")
-
-	var defaultConfig AppConfig
-	var finalConfig AppConfig
+func exampleinitConfig() *ExampleAppConfig {
+	var defaultConfig ExampleAppConfig
+	var finalConfig ExampleAppConfig
 
 	defaultConfig.AppPort = 8000
 	defaultConfig.AppEnvironment = ""
