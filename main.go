@@ -15,10 +15,12 @@ import (
 	AdminsService "altaStore/business/admins"
 	CategoriesService "altaStore/business/categories"
 	ProductsService "altaStore/business/products"
+	productsimages "altaStore/business/products_images"
 	AdminsRepository "altaStore/modules/admins"
 	CategoriesRepository "altaStore/modules/categories"
 	migration "altaStore/modules/migration"
 	ProductsRepository "altaStore/modules/products"
+	ProductsImages "altaStore/modules/products_images"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
@@ -77,9 +79,12 @@ func main() {
 	categoriesService := CategoriesService.InitCategoriesService(categoriesRepository)
 	categoriesController := CategoriesController.InitCategoriesController(categoriesService)
 
+	productsImagesRepository := ProductsImages.InitProductsImagesRepository(dbConnection)
+	productsImagesService := productsimages.InitProductsImagesService(productsImagesRepository)
+
 	productsRepository := ProductsRepository.InitProducstRepository(dbConnection)
-	productsService := ProductsService.InitProductsService(productsRepository)
-	productsController := ProductsController.InitProductsController(productsService)
+	productsService := ProductsService.InitProductsService(productsRepository, productsImagesRepository)
+	productsController := ProductsController.InitProductsController(productsService, productsImagesService)
 
 	e := echo.New()
 

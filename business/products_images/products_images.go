@@ -1,12 +1,22 @@
 package productsimages
 
-import "time"
+import (
+	"time"
+)
 
 type ProductImages struct {
 	ID          int
-	Image_path  string
+	FileName    string
+	Path        string
 	Products_ID int
-	Cretaed_at  time.Time
+	Created_at  time.Time
 	Updated_at  time.Time
 	Deleted_at  time.Time
+}
+
+func NewProductsImage(id_products int, image_path string) *ProductImages {
+	return &ProductImages{
+		Products_ID: id_products,
+		Created_at:  time.Now(),
+	}
 }

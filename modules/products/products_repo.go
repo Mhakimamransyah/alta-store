@@ -49,6 +49,7 @@ func ConvertProductsToProductsTable(products *products.Products) *ProductsTable 
 }
 
 func ConvertProductsTableToProducts(products_table *ProductsTable) *products.Products {
+	// add product images list
 	return &products.Products{
 		ID:           products_table.ID,
 		Stock:        products_table.Stock,
@@ -95,13 +96,14 @@ func (repository *GormRepository) GetDetailProducts(id_products int) (*products.
 	return products, nil
 }
 
-func (repository *GormRepository) CreateProducts(products *products.Products, createdBy string) error {
+func (repository *GormRepository) CreateProducts(products *products.Products, createdBy string) (*products.Products, error) {
 	products_table := ConvertProductsToProductsTable(products)
 	err := repository.DB.Save(products_table).Error
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	return ConvertProductsTableToProducts(products_table), nil
 }
 
 func (repository *GormRepository) UpdateProducts(id_products int, products *products.Products, modifiedBy string) error {

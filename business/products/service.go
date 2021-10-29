@@ -2,12 +2,13 @@ package products
 
 import (
 	"altaStore/business"
+	productsimages "altaStore/business/products_images"
 	"altaStore/util/validator"
-	"fmt"
 )
 
 type service struct {
-	repository Repository
+	products_repository        Repository
+	products_images_repository productsimages.Repository
 }
 
 type ProductsSpec struct {
@@ -29,41 +30,54 @@ type ProductsUpdatable struct {
 	CategoriesID int     `form:"id_categories" validate:"required"`
 }
 
-func InitProductsService(repository Repository) *service {
+func InitProductsService(products_repo Repository, products_img_repo productsimages.Repository) *service {
 	return &service{
-		repository: repository,
+		products_repository:        products_repo,
+		products_images_repository: products_img_repo,
 	}
 }
 
 func (service *service) FindAllProducts(limit, offset int) (*[]Products, error) {
-	list_products, err := service.repository.GetAllProducts(limit, offset)
+	list_products, err := service.products_repository.GetAllProducts(limit, offset)
 	if err != nil {
 		return nil, err
 	}
-	return list_products, nil
+
+	var list_products_with_products_images []Products
+	for _, data := range *list_products {
+		list_products_images, error := service.products_images_repository.GetListProductsImagesByIdProducts(data.ID)
+		if error != nil {
+			continue
+		}
+		data.Products_images = *list_products_images
+		list_products_with_products_images = append(list_products_with_products_images, data)
+	}
+
+	return &list_products_with_products_images, nil
 }
 
 func (service *service) DetailProducts(id_products int) (*Products, error) {
-	fmt.Println("***")
-	fmt.Println(id_products)
-	products, err := service.repository.GetDetailProducts(id_products)
+	products, err := service.products_repository.GetDetailProducts(id_products)
 	if err != nil {
 		return nil, err
 	}
+	products_with_images, err := service.products_images_repository.GetListProductsImagesByIdProducts(products.ID)
+	products.Products_images = *products_with_images
 	return products, nil
 }
 
-func (service *service) InsertProducts(id_admin int, products_spec ProductsSpec, createdBy string) error {
+func (service *service) InsertProducts(id_admin int, products_spec ProductsSpec, createdBy string) (*Products, error) {
 	err := validator.GetValidator().Struct(&products_spec)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	products := NewProducts(id_admin, products_spec)
-	err = service.repository.CreateProducts(products, createdBy)
+	products, err = service.products_repository.CreateProducts(products, createdBy)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	return products, nil
 }
 
 func (service *service) ModifyProducts(id_admin, id_products int, products_updatable ProductsUpdatable, modifiedBy string) error {
@@ -71,7 +85,7 @@ func (service *service) ModifyProducts(id_admin, id_products int, products_updat
 	if err != nil {
 		return err
 	}
-	products, err := service.repository.GetDetailProducts(id_products)
+	products, err := service.products_repository.GetDetailProducts(id_products)
 	if err != nil {
 		return err
 	}
@@ -83,7 +97,7 @@ func (service *service) ModifyProducts(id_admin, id_products int, products_updat
 
 	new_products := products.ModifyProducts(id_admin, products_updatable)
 
-	err = service.repository.UpdateProducts(id_products, new_products, modifiedBy)
+	err = service.products_repository.UpdateProducts(id_products, new_products, modifiedBy)
 	if err != nil {
 		return err
 	}

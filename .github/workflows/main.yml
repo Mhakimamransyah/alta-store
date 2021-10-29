@@ -1,0 +1,18 @@
+name: ci/cd process
+
+on:
+  push:
+    branches:
+      - 'Admin'
+jobs:
+  unit-test:
+      name: unit-test-ci
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+      - name: setup golang
+        uses: action/setup-go@v2
+        with: 
+          go-version: 1.16
+      - name: running unit unit-test
+        run: go test ./... -cover

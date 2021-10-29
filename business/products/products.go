@@ -1,20 +1,24 @@
 package products
 
-import "time"
+import (
+	productsimages "altaStore/business/products_images"
+	"time"
+)
 
 type Products struct {
-	ID           int
-	Stock        int
-	Title        string
-	Price        int
-	Description  string
-	Weight       float64
-	Status       string
-	AdminID      int
-	CategoriesID int
-	Created_at   time.Time
-	Updated_at   time.Time
-	Deleted_at   time.Time
+	ID              int
+	Stock           int
+	Title           string
+	Price           int
+	Description     string
+	Weight          float64
+	Status          string
+	AdminID         int
+	CategoriesID    int
+	Created_at      time.Time
+	Updated_at      time.Time
+	Deleted_at      time.Time
+	Products_images []productsimages.ProductImages
 }
 
 func NewProducts(id_admin int, product_spec ProductsSpec) *Products {

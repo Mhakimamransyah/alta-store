@@ -5,6 +5,7 @@ import (
 	"altaStore/api/v1/admins"
 	"altaStore/api/v1/categories"
 	"altaStore/api/v1/products"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
@@ -44,6 +45,10 @@ func RegisterPath(e *echo.Echo,
 	products.Use(middleware.JWTMiddleware())
 	products.GET("", productsController.FindAllProductsController)
 	products.GET("/:id_products", productsController.DetailProductsController)
+
+	// Products Images
+	fs := http.FileServer(http.Dir("products_image/"))
+	e.GET("/products_img/*", echo.WrapHandler(http.StripPrefix("/products_img/", fs)))
 
 	//health check
 	e.GET("/health", func(c echo.Context) error {
