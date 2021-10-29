@@ -23,4 +23,7 @@ var (
 
 	//ErrAddToCart Error invalid on do parameter
 	ErrAddToCart = errors.New("Product not found, cannot use subtraction")
+
+	// ErrUnauthorized Error when users try to modify / deleted data that not belongs to him
+	ErrUnauthorized = errors.New("Unauthorized action")
 )

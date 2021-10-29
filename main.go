@@ -10,16 +10,27 @@ import (
 	"time"
 
 	addressController "altaStore/api/v1/address"
+	AdminsController "altaStore/api/v1/admins"
 	authController "altaStore/api/v1/auth"
 	cartController "altaStore/api/v1/cart"
+	CategoriesController "altaStore/api/v1/categories"
+	ProductsController "altaStore/api/v1/products"
 	userController "altaStore/api/v1/user"
 	addressService "altaStore/business/address"
+	AdminsService "altaStore/business/admins"
 	authService "altaStore/business/auth"
 	cartService "altaStore/business/cart"
+	CategoriesService "altaStore/business/categories"
+	ProductsService "altaStore/business/products"
+	productsimages "altaStore/business/products_images"
 	userService "altaStore/business/user"
 	addressRepository "altaStore/modules/address"
+	AdminsRepository "altaStore/modules/admins"
 	cartRepository "altaStore/modules/cart"
+	CategoriesRepository "altaStore/modules/categories"
 	migration "altaStore/modules/migration"
+	ProductsRepository "altaStore/modules/products"
+	ProductsImages "altaStore/modules/products_images"
 	userRepository "altaStore/modules/user"
 
 	"github.com/labstack/echo/v4"
@@ -58,24 +69,15 @@ func newDatabaseConnection(config *config.AppConfig) *gorm.DB {
 func main() {
 	//load config if available or set to default
 	config := config.GetConfig()
-	fmt.Println(config)
 
 	//initialize database connection based on given config
 	dbConnection := newDatabaseConnection(config)
 
-	//initiate user repository
 	userRepo := userRepository.NewGormDBRepository(dbConnection)
-
-	//initiate user service
 	userService := userService.NewService(userRepo)
-
-	//initiate user controller
 	userController := userController.NewController(userService)
 
-	//initiate auth service
 	authService := authService.NewService(userService)
-
-	//initiate auth controller
 	authController := authController.NewController(authService)
 
 	addressRepo := addressRepository.NewGormDBRepository(dbConnection)
@@ -85,6 +87,21 @@ func main() {
 	cartRepo := cartRepository.NewGormDBRepository(dbConnection)
 	cartService := cartService.NewService(cartRepo)
 	cartController := cartController.NewController(cartService)
+
+	adminRepository := AdminsRepository.InitAdminRepository(dbConnection)
+	adminService := AdminsService.InitAdminService(adminRepository)
+	adminController := AdminsController.InitAdminController(adminService)
+
+	categoriesRepository := CategoriesRepository.InitCategoriesRepository(dbConnection)
+	categoriesService := CategoriesService.InitCategoriesService(categoriesRepository)
+	categoriesController := CategoriesController.InitCategoriesController(categoriesService)
+
+	productsImagesRepository := ProductsImages.InitProductsImagesRepository(dbConnection)
+	productsImagesService := productsimages.InitProductsImagesService(productsImagesRepository)
+
+	productsRepository := ProductsRepository.InitProducstRepository(dbConnection)
+	productsService := ProductsService.InitProductsService(productsRepository, productsImagesRepository)
+	productsController := ProductsController.InitProductsController(productsService, productsImagesService)
 
 	//create echo http
 	e := echo.New()
@@ -96,6 +113,9 @@ func main() {
 		userController,
 		addressController,
 		cartController,
+		adminController,
+		categoriesController,
+		productsController,
 	)
 
 	// run server

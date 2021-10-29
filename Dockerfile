@@ -1,5 +1,5 @@
-# stage I - khusus build dengan envinroment yang sama
 FROM golang:1.16-alpine AS builder
+
 RUN mkdir /app
 ADD . /app
 WORKDIR /app
