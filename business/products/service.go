@@ -11,6 +11,16 @@ type service struct {
 	products_images_repository productsimages.Repository
 }
 
+type FilterProducts struct {
+	CategoriesId int
+	Query        string
+	Sort         string
+	Price_max    int
+	Price_min    int
+	Page         int
+	Per_page     int
+}
+
 type ProductsSpec struct {
 	Title         string  `form:"title" validate:"required,max=100"`
 	Price         int     `form:"price" validate:"required"`
@@ -37,8 +47,8 @@ func InitProductsService(products_repo Repository, products_img_repo productsima
 	}
 }
 
-func (service *service) FindAllProducts(limit, offset int) (*[]Products, error) {
-	list_products, err := service.products_repository.GetAllProducts(limit, offset)
+func (service *service) FindAllProducts(filter FilterProducts) (*[]Products, error) {
+	list_products, err := service.products_repository.GetAllProducts(filter)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +76,7 @@ func (service *service) DetailProducts(id_products int) (*Products, error) {
 	return products, nil
 }
 
-func (service *service) InsertProducts(id_admin int, products_spec ProductsSpec, createdBy string) (*Products, error) {
+func (service *service) InsertProducts(id_admin int, products_spec ProductsSpec, createdBy int) (*Products, error) {
 	err := validator.GetValidator().Struct(&products_spec)
 	if err != nil {
 		return nil, err
@@ -80,7 +90,7 @@ func (service *service) InsertProducts(id_admin int, products_spec ProductsSpec,
 	return products, nil
 }
 
-func (service *service) ModifyProducts(id_admin, id_products int, products_updatable ProductsUpdatable, modifiedBy string) error {
+func (service *service) ModifyProducts(id_admin, id_products int, products_updatable ProductsUpdatable, modifiedBy int) error {
 	err := validator.GetValidator().Struct(&products_updatable)
 	if err != nil {
 		return err
@@ -101,5 +111,27 @@ func (service *service) ModifyProducts(id_admin, id_products int, products_updat
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (service *service) RemoveProductsImages(id_products, id_products_images int, deletedById int) error {
+	products_images, err := service.products_images_repository.GetProductsImagesById(id_products_images)
+	if err != nil {
+		return err
+	}
+	products, err := service.products_repository.GetDetailProducts(products_images.Products_ID)
+	if err != nil {
+		return err
+	}
+	// Check admin authority
+	if products.AdminID != deletedById {
+		return business.ErrUnauthorized
+	}
+
+	err = service.products_images_repository.DeleteProductsImages(products_images, deletedById)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -43,7 +43,7 @@ func (service *service) FindAllSubCategories(id_categories, limit, offset int) (
 	return list, nil
 }
 
-func (service *service) InsertCategories(categories_spec CategoriesSpec, id_admin int, createdBy string) error {
+func (service *service) InsertCategories(categories_spec CategoriesSpec, id_admin int, createdBy int) error {
 	err := validator.GetValidator().Struct(categories_spec)
 	if err != nil {
 		return business.ErrInvalidSpec
@@ -64,7 +64,7 @@ func (service *service) InsertCategories(categories_spec CategoriesSpec, id_admi
 	return nil
 }
 
-func (service *service) ModifyCategories(categories_updatable CategoriesUpdatable, id_categories int, id_admin int, modifiedBy string) error {
+func (service *service) ModifyCategories(categories_updatable CategoriesUpdatable, id_categories int, id_admin int, modifiedBy int) error {
 	categories, err := service.repository.GetCategoriesById(id_categories)
 	if err != nil {
 		return err
@@ -88,7 +88,7 @@ func (service *service) ModifyCategories(categories_updatable CategoriesUpdatabl
 	return nil
 }
 
-func (service *service) RemoveCategories(id_categories int, id_admin int, deletedBy string) error {
+func (service *service) RemoveCategories(id_categories int, id_admin int, deletedBy int) error {
 	categories, err := service.repository.GetCategoriesById(id_categories)
 	if err != nil {
 		return err

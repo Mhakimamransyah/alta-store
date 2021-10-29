@@ -5,8 +5,8 @@ type Service interface {
 	FindAdminByUsername(username string) (*Admins, error)
 	FindAdminById(id_admins int) (*Admins, error)
 	LoginAdmin(username, password string) (*Admins, error)
-	InsertAdmin(admin_spec AdminSpec, createdBy string) error
-	ModifyAdmin(username string, admin AdminUpdatable, modifiedBy string) error
+	InsertAdmin(admin_spec AdminSpec, createdById int) error
+	ModifyAdmin(username string, admin AdminUpdatable, modifiedById int) error
 }
 
 type Repository interface {

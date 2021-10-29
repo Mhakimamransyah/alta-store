@@ -65,7 +65,7 @@ func (admin_service *service) LoginAdmin(username, password string) (*Admins, er
 	return admin, nil
 }
 
-func (admin_service *service) InsertAdmin(admin_spec AdminSpec, createdBy string) error {
+func (admin_service *service) InsertAdmin(admin_spec AdminSpec, createdById int) error {
 	err := validator.GetValidator().Struct(admin_spec)
 	if err != nil {
 		return business.ErrInvalidSpec
@@ -77,12 +77,22 @@ func (admin_service *service) InsertAdmin(admin_spec AdminSpec, createdBy string
 		return err
 	}
 
+	// IF NOT MOCKED CREATE ADMIN
+	createdByUsername := "mock"
+	if createdById != -404 {
+		admin_requested, err := admin_service.AdminsRepository.GetAdminById(createdById)
+		if err != nil {
+			return business.ErrUnauthorized
+		}
+		createdByUsername = admin_requested.Name
+	}
+
 	admin := NewAdmin(admin_spec.Name,
 		admin_spec.Username,
 		admin_spec.Email,
 		string(hashedPassword),
 		admin_spec.Phone_number,
-		createdBy,
+		createdByUsername,
 	)
 
 	err = admin_service.AdminsRepository.CreateAdmin(&admin)
@@ -92,7 +102,7 @@ func (admin_service *service) InsertAdmin(admin_spec AdminSpec, createdBy string
 	return nil
 }
 
-func (admin_service *service) ModifyAdmin(username string, admin_updatable AdminUpdatable, modifiedBy string) error {
+func (admin_service *service) ModifyAdmin(username string, admin_updatable AdminUpdatable, modifiedBy int) error {
 	err := validator.GetValidator().Struct(admin_updatable)
 	if err != nil {
 		return err
@@ -104,7 +114,7 @@ func (admin_service *service) ModifyAdmin(username string, admin_updatable Admin
 	}
 
 	fmt.Println(admin_data)
-	new_admin_data := admin_data.ModifyAdmin(admin_updatable, modifiedBy)
+	new_admin_data := admin_data.ModifyAdmin(admin_updatable)
 	err = admin_service.AdminsRepository.UpdateAdmin(&new_admin_data)
 	if err != nil {
 		return err

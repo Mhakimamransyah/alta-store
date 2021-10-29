@@ -42,12 +42,9 @@ func ConvertAdminToAdminLogin(admin *admins.Admins) *AdminLogin {
 func createToken(admin *admins.Admins) (string, error) {
 	claims := jwt.MapClaims{
 		"id":         admin.ID,
-		"created_at": admin.Created_at,
 		"authorized": true,
-		"timestamp":  time.Now(),
 		"exp":        time.Now().Add(time.Hour * 1).Unix(),
 		"name":       admin.Name,
-		"username":   admin.Username,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

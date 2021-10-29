@@ -5,6 +5,7 @@ import (
 	"altaStore/api/v1/admins"
 	"altaStore/api/v1/categories"
 	"altaStore/api/v1/products"
+
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -17,7 +18,7 @@ func RegisterPath(e *echo.Echo,
 ) {
 
 	e.POST("admins/login", adminController.LoginController)
-	e.POST("adminmockdata", adminController.CreateAdminController)
+	e.POST("adminmockdata", adminController.CreateMockAdminController)
 
 	// Admin
 	admin := e.Group("admins")
@@ -45,6 +46,9 @@ func RegisterPath(e *echo.Echo,
 	products.Use(middleware.JWTMiddleware())
 	products.GET("", productsController.FindAllProductsController)
 	products.GET("/:id_products", productsController.DetailProductsController)
+	products.POST("/:id_products/products_images", productsController.InsertNewProductsPictureController)
+	products.DELETE("/:id_products/products_images/:id_products_images", productsController.RemoveProductsPictureController)
+	products.GET("/search", productsController.FindAllProductsController)
 
 	// Products Images
 	fs := http.FileServer(http.Dir("products_image/"))

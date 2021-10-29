@@ -22,7 +22,6 @@ type AdminsTable struct {
 	Phone_number string    `gorm:"phone_number;type:varchar(20);not null"`
 	Username     string    `gorm:"username;type:varchar(10);uniqueIndex:username,sort:asc;not null"`
 	Created_by   string    `gorm:"created_by;default:null"`
-	Modified_by  string    `gorm:"modified_by;default:null"`
 	Created_at   time.Time `gorm:"created_at;type:datetime;default:null"`
 	Updated_at   time.Time `gorm:"updated_at;type:datetime;default:null"`
 	Deleted_at   time.Time `gorm:"deleted_at;type:datetime;default:null"`
@@ -40,7 +39,6 @@ func ConvertToAdminTable(admin *admins.Admins) *AdminsTable {
 		Created_at:   admin.Created_at,
 		Updated_at:   admin.Updated_at,
 		Deleted_at:   admin.Deleted_at,
-		Modified_by:  admin.Modified_by,
 	}
 }
 
@@ -56,7 +54,6 @@ func (admins_table *AdminsTable) ConvertToAdmin() *admins.Admins {
 		Updated_at:   admins_table.UpdatedAt,
 		CreatedBy:    admins_table.Created_by,
 		Deleted_at:   admins_table.UpdatedAt,
-		Modified_by:  admins_table.Modified_by,
 	}
 }
 
@@ -126,7 +123,6 @@ func (repository *GormRepository) UpdateAdmin(admin *admins.Admins) error {
 		Name:         admin.Name,
 		Status:       admin.Status,
 		Phone_number: admin.Phone_number,
-		Modified_by:  admin.Modified_by,
 		Updated_at:   admin.Updated_at,
 	}).Error
 	if err != nil {

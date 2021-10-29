@@ -72,9 +72,44 @@ func InitProducstRepository(db *gorm.DB) *GormRepository {
 	}
 }
 
-func (repository *GormRepository) GetAllProducts(limit, offset int) (*[]products.Products, error) {
+func (repository *GormRepository) GetAllProducts(filter products.FilterProducts) (*[]products.Products, error) {
 	var list_products_table []ProductsTable
-	err := repository.DB.Where("status = ?", "active").Offset(offset - 1).Limit(limit).Find(&list_products_table).Error
+	model := repository.DB
+	if filter.CategoriesId != 0 {
+		model = model.Where("categories_id = ?", filter.CategoriesId)
+	}
+
+	if filter.Query != "" {
+		model = model.Where("title LIKE ?", filter.Query+"%")
+	}
+
+	if filter.Sort != "asc" {
+		// default
+		model = model.Order("created_at desc")
+	} else {
+		model = model.Order("created_at asc")
+	}
+
+	if filter.Price_max != 0 {
+		// price max set
+		model = model.Where("price <= ?", filter.Price_max)
+	}
+
+	if filter.Price_min != -1 {
+		// price min set
+		model = model.Where("price >= ?", filter.Price_min)
+	}
+
+	if filter.Per_page != 100 {
+		model = model.Limit(filter.Per_page)
+	}
+
+	if filter.Page != 0 {
+		model = model.Offset(filter.Page - 1)
+	}
+	// err := repository.DB.Where("status = ?", "active").Offset(offset - 1).Limit(limit).Find(&list_products_table).Error
+	err := model.Find(&list_products_table).Error
+
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +131,7 @@ func (repository *GormRepository) GetDetailProducts(id_products int) (*products.
 	return products, nil
 }
 
-func (repository *GormRepository) CreateProducts(products *products.Products, createdBy string) (*products.Products, error) {
+func (repository *GormRepository) CreateProducts(products *products.Products, createdBy int) (*products.Products, error) {
 	products_table := ConvertProductsToProductsTable(products)
 	err := repository.DB.Save(products_table).Error
 	if err != nil {
@@ -106,7 +141,7 @@ func (repository *GormRepository) CreateProducts(products *products.Products, cr
 	return ConvertProductsTableToProducts(products_table), nil
 }
 
-func (repository *GormRepository) UpdateProducts(id_products int, products *products.Products, modifiedBy string) error {
+func (repository *GormRepository) UpdateProducts(id_products int, products *products.Products, modifiedBy int) error {
 	products_table := ConvertProductsToProductsTable(products)
 	err := repository.DB.Where("id = ?", id_products).Model(products_table).Updates(ProductsTable{
 		Stock:        products.Stock,

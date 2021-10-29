@@ -3,11 +3,11 @@ package products
 import (
 	"altaStore/api/common"
 	"altaStore/api/middleware"
+	"altaStore/api/v1/products/request"
+
 	"altaStore/business/products"
 	productsimages "altaStore/business/products_images"
 	"fmt"
-	"io"
-	"os"
 	"strconv"
 	"time"
 
@@ -28,20 +28,19 @@ func InitProductsController(service products.Service, products_images_s products
 
 func (controller *Controller) CreateProductsController(c echo.Context) error {
 	products_spec := products.ProductsSpec{}
-	mockService(c)
 	c.Bind(&products_spec)
 	id_admin, err := strconv.Atoi(c.Param("id_admin"))
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
-	new_products, err := controller.products_service.InsertProducts(id_admin, products_spec, middleware.ExtractTokenKey(c, "username").(string))
+	new_products, err := controller.products_service.InsertProducts(id_admin, products_spec, int(middleware.ExtractTokenKey(c, "id").(float64)))
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
 
 	form, err := c.MultipartForm()
 	if err != nil {
-		fmt.Println(err)
+		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
 	files := form.File["files"]
 	file_name := strconv.Itoa(new_products.ID)
@@ -52,9 +51,10 @@ func (controller *Controller) CreateProductsController(c echo.Context) error {
 		FileName:    file_name,
 	}
 
-	err = controller.products_image_service.InsertNewImages(products_images,
+	err = controller.products_image_service.InsertNewImages(&products_images,
 		files,
-		middleware.ExtractTokenKey(c, "username").(string))
+		int(middleware.ExtractTokenKey(c, "id").(float64)),
+	)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
@@ -63,60 +63,60 @@ func (controller *Controller) CreateProductsController(c echo.Context) error {
 	return c.JSON(common.NewSuccessResponseWithoutData())
 }
 
-func mockService(c echo.Context) {
-	// Parse our multipart form, 10 << 20 specifies a maximum
-	// upload of 10 MB files.
-	// data, err := c.FormFile("foto")
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// }
-	// fmt.Println("Ukuran file : ", float64(data.Size/1024/1024))
-	// fmt.Println("Type file : ", data.Header["Content-Type"][0])
-	// src, err := data.Open()
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// defer src.Close()
-	// // Destination
-	// dst, err := os.Create(data.Filename)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// defer dst.Close()
-	// if _, err = io.Copy(dst, src); err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println("done")
+// func mockService(c echo.Context) {
+// 	// Parse our multipart form, 10 << 20 specifies a maximum
+// 	// upload of 10 MB files.
+// 	// data, err := c.FormFile("foto")
+// 	// if err != nil {
+// 	// 	fmt.Println(err.Error())
+// 	// }
+// 	// fmt.Println("Ukuran file : ", float64(data.Size/1024/1024))
+// 	// fmt.Println("Type file : ", data.Header["Content-Type"][0])
+// 	// src, err := data.Open()
+// 	// if err != nil {
+// 	// 	fmt.Println(err)
+// 	// }
+// 	// defer src.Close()
+// 	// // Destination
+// 	// dst, err := os.Create(data.Filename)
+// 	// if err != nil {
+// 	// 	fmt.Println(err)
+// 	// }
+// 	// defer dst.Close()
+// 	// if _, err = io.Copy(dst, src); err != nil {
+// 	// 	fmt.Println(err)
+// 	// }
+// 	// fmt.Println("done")
 
-	form, err := c.MultipartForm()
-	if err != nil {
-		fmt.Println(err)
-	}
-	files := form.File["files"]
+// 	form, err := c.MultipartForm()
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+// 	files := form.File["files"]
 
-	for _, file := range files {
-		// Source
-		src, err := file.Open()
-		if err != nil {
-			fmt.Println(err)
-		}
-		defer src.Close()
+// 	for _, file := range files {
+// 		// Source
+// 		src, err := file.Open()
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 		defer src.Close()
 
-		// Destination
-		dst, err := os.Create(file.Filename)
-		if err != nil {
-			fmt.Println(err)
-		}
-		defer dst.Close()
+// 		// Destination
+// 		dst, err := os.Create(file.Filename)
+// 		if err != nil {
+// 			fmt.Println(err)
+// 		}
+// 		defer dst.Close()
 
-		// Copy
-		if _, err = io.Copy(dst, src); err != nil {
-			fmt.Println(err)
-		}
+// 		// Copy
+// 		if _, err = io.Copy(dst, src); err != nil {
+// 			fmt.Println(err)
+// 		}
 
-	}
+// 	}
 
-}
+// }
 
 func (controller *Controller) ModifyProductsController(c echo.Context) error {
 	products_updatables := products.ProductsUpdatable{}
@@ -133,7 +133,7 @@ func (controller *Controller) ModifyProductsController(c echo.Context) error {
 		id_admin,
 		id_products,
 		products_updatables,
-		middleware.ExtractTokenKey(c, "username").(string),
+		int(middleware.ExtractTokenKey(c, "id").(float64)),
 	)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
@@ -154,17 +154,54 @@ func (controller *Controller) DetailProductsController(c echo.Context) error {
 }
 
 func (controller *Controller) FindAllProductsController(c echo.Context) error {
-	limit, err := strconv.Atoi(c.QueryParam("per_page"))
-	if err != nil {
-		return c.JSON(common.NewBadRequestResponseWithMessage("Invalid per_page type"))
-	}
-	offset, err := strconv.Atoi(c.QueryParam("page"))
-	if err != nil {
-		return c.JSON(common.NewBadRequestResponseWithMessage("Invalid page type"))
-	}
-	data, err := controller.products_service.FindAllProducts(limit, offset)
+	filter := request.NewFilterProducts(c)
+	data, err := controller.products_service.FindAllProducts(*filter)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
 	return c.JSON(common.NewSuccessResponse(data))
+}
+
+func (controller *Controller) RemoveProductsPictureController(c echo.Context) error {
+	id_products, err := strconv.Atoi(c.Param("id_products"))
+	if err != nil {
+		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
+	}
+	id_products_images, err := strconv.Atoi(c.Param("id_products_images"))
+	if err != nil {
+		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
+	}
+	id_admin := int(middleware.ExtractTokenKey(c, "id").(float64))
+	err = controller.products_service.RemoveProductsImages(id_products, id_products_images, id_admin)
+	if err != nil {
+		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
+	}
+	return c.JSON(common.NewSuccessResponseWithoutData())
+}
+
+func (controller *Controller) InsertNewProductsPictureController(c echo.Context) error {
+	id_products, err := strconv.Atoi(c.Param("id_products"))
+	if err != nil {
+		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
+	}
+	id_admin := int(middleware.ExtractTokenKey(c, "id").(float64))
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		fmt.Println(err)
+	}
+	files := form.File["files"]
+
+	products_images := productsimages.ProductImages{
+		Products_ID: id_products,
+		Created_at:  time.Now(),
+		FileName:    strconv.Itoa(id_products),
+	}
+
+	err = controller.products_image_service.InsertNewImages(&products_images, files, id_admin)
+	if err != nil {
+		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
+	}
+
+	return c.JSON(common.NewSuccessResponseWithoutData())
 }

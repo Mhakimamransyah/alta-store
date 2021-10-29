@@ -18,6 +18,10 @@ type GormRepository struct {
 	DB *gorm.DB
 }
 
+const (
+	folder = "products_image"
+)
+
 type ProductsImagesTable struct {
 	ID          int                    `gorm:"id;primaryKey:autoIncrement"`
 	FileName    string                 `gorm:"image_path"`
@@ -57,9 +61,8 @@ func InitProductsImagesRepository(db *gorm.DB) *GormRepository {
 	}
 }
 
-func (repository *GormRepository) CreateImages(products_images *productsimages.ProductImages, files []*multipart.FileHeader, createdBy string) error {
+func (repository *GormRepository) CreateImages(products_images *productsimages.ProductImages, files []*multipart.FileHeader, createdBy int) error {
 	for _, file := range files {
-		folder := "products_image"
 		filename := products_images.FileName + "-" + strconv.Itoa(time.Now().Second()) + "-" + strconv.Itoa(time.Now().Minute()) + strconv.Itoa(rand.Intn(1000)) + ".png"
 		products_images_table := ConvertProductsImagesToProductsImagesTable(products_images)
 		products_images_table.FileName = filename
@@ -104,4 +107,29 @@ func (repository *GormRepository) GetListProductsImagesByIdProducts(id_products 
 	}
 
 	return &list_products_images, nil
+}
+
+func (repository *GormRepository) DeleteProductsImages(products_images *productsimages.ProductImages, deletedById int) error {
+	products_images_table := ConvertProductsImagesToProductsImagesTable(products_images)
+	path := folder + "/" + products_images_table.FileName
+	err := repository.DB.Where("id = ?", products_images.ID).Delete(&products_images_table).Error
+	if err != nil {
+		return err
+	}
+
+	// remove file system
+	err = os.Remove(path)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repository *GormRepository) GetProductsImagesById(id_products_image int) (*productsimages.ProductImages, error) {
+	var products_images_table ProductsImagesTable
+	err := repository.DB.Where("id = ?", id_products_image).First(&products_images_table).Error
+	if err != nil {
+		return nil, err
+	}
+	return ConvertProductsImagesTableToProductImages(&products_images_table), nil
 }

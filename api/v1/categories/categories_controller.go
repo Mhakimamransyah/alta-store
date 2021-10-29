@@ -59,7 +59,7 @@ func (service *Controller) InsertCategoriesController(c echo.Context) error {
 	categories := categories.CategoriesSpec{}
 	c.Bind(&categories)
 
-	username_admin := middleware.ExtractTokenKey(c, "username").(string)
+	id_admin_token := int(middleware.ExtractTokenKey(c, "id").(float64))
 
 	id_admin, err := strconv.Atoi(c.Param("id_admin"))
 	if err != nil {
@@ -69,7 +69,7 @@ func (service *Controller) InsertCategoriesController(c echo.Context) error {
 	err = service.categories_service.InsertCategories(
 		categories,
 		id_admin,
-		username_admin)
+		id_admin_token)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
@@ -89,13 +89,13 @@ func (service *Controller) ModifyCategoriesController(c echo.Context) error {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
 
-	username_admin := middleware.ExtractTokenKey(c, "username").(string)
+	id_admin_token := int(middleware.ExtractTokenKey(c, "id").(float64))
 
 	err = service.categories_service.ModifyCategories(
 		categories,
 		id_categories,
 		id_admin,
-		username_admin,
+		id_admin_token,
 	)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
@@ -113,12 +113,12 @@ func (service *Controller) RemoveCategoriesController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
-	username_admin := middleware.ExtractTokenKey(c, "username").(string)
+	id_admin_token := int(middleware.ExtractTokenKey(c, "id").(float64))
 
 	err = service.categories_service.RemoveCategories(
 		id_categories,
 		id_admin,
-		username_admin)
+		id_admin_token)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}

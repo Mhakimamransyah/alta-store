@@ -1,6 +1,8 @@
 package productsimages
 
-import "mime/multipart"
+import (
+	"mime/multipart"
+)
 
 type service struct {
 	repository Repository
@@ -12,8 +14,8 @@ func InitProductsImagesService(repository Repository) *service {
 	}
 }
 
-func (service *service) InsertNewImages(products_image ProductImages, files []*multipart.FileHeader, createdBy string) error {
-	err := service.repository.CreateImages(&products_image, files, createdBy)
+func (service *service) InsertNewImages(products_image *ProductImages, files []*multipart.FileHeader, createdBy int) error {
+	err := service.repository.CreateImages(products_image, files, createdBy)
 	if err != nil {
 		return err
 	}

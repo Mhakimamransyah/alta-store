@@ -57,8 +57,18 @@ func (admin_service *Controller) CreateAdminController(c echo.Context) error {
 	admin_spec := admins.AdminSpec{}
 	c.Bind(&admin_spec)
 
-	username_admin := middleware.ExtractTokenKey(c, "username").(string)
-	err := admin_service.adminService.InsertAdmin(admin_spec, username_admin)
+	id_admin := int(middleware.ExtractTokenKey(c, "id").(float64))
+	err := admin_service.adminService.InsertAdmin(admin_spec, id_admin)
+	if err != nil {
+		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
+	}
+	return c.JSON(common.NewSuccessResponseWithoutData())
+}
+
+func (admin_service *Controller) CreateMockAdminController(c echo.Context) error {
+	admin_spec := admins.AdminSpec{}
+	c.Bind(&admin_spec)
+	err := admin_service.adminService.InsertAdmin(admin_spec, -404)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
@@ -68,8 +78,8 @@ func (admin_service *Controller) CreateAdminController(c echo.Context) error {
 func (admin_service *Controller) ModifyAdminController(c echo.Context) error {
 	admin_updatable := admins.AdminUpdatable{}
 	c.Bind(&admin_updatable)
-	username_admin := middleware.ExtractTokenKey(c, "username").(string)
-	err := admin_service.adminService.ModifyAdmin(c.Param("username"), admin_updatable, username_admin)
+	id_admin := int(middleware.ExtractTokenKey(c, "id").(float64))
+	err := admin_service.adminService.ModifyAdmin(c.Param("username"), admin_updatable, id_admin)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}

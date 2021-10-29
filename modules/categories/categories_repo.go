@@ -57,7 +57,7 @@ func InitCategoriesRepository(db *gorm.DB) *GormRepository {
 	}
 }
 
-func (repository *GormRepository) CreateCategories(categories *categories.Categories, createdBy string) error {
+func (repository *GormRepository) CreateCategories(categories *categories.Categories, createdBy int) error {
 	categories_table := ConvertCategoriesToCategoriesTable(categories)
 	err := repository.DB.Save(categories_table).Error
 	if err != nil {
@@ -66,7 +66,7 @@ func (repository *GormRepository) CreateCategories(categories *categories.Catego
 	return nil
 }
 
-func (repository *GormRepository) UpdateCategories(categories *categories.Categories, modifiedBy string) error {
+func (repository *GormRepository) UpdateCategories(categories *categories.Categories, modifiedBy int) error {
 	categories_table := ConvertCategoriesToCategoriesTable(categories)
 	err := repository.DB.Where("ID = ?", categories.ID).Model(&categories_table).Updates(CategoriesTable{
 		Name:       categories.Name,
@@ -118,7 +118,7 @@ func (repository *GormRepository) GetSubCategories(id_categories, limit, offset 
 	return &list_categories, nil
 }
 
-func (repository *GormRepository) DeleteCategories(id_categories int, deletedBy string) error {
+func (repository *GormRepository) DeleteCategories(id_categories int, deletedBy int) error {
 	err := repository.DB.Where("ID = ?", id_categories).Delete(&CategoriesTable{}).Error
 	if err != nil {
 		return err
