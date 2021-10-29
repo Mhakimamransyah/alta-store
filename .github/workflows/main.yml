@@ -23,6 +23,11 @@ jobs:
     needs: unit-test
     steps:
      - uses: actions/checkout@v2
+     - name: generate config file
+       env:
+        CONFIG: ${{secrets.CONFIG_APP}}
+       run: |
+         echo "$CONFIG" > ./.env 
      - name: build image
        run: docker build -t mhakim/altastore:1.4 .
      - name: login docker hub
