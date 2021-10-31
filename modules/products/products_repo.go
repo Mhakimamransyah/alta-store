@@ -4,6 +4,7 @@ import (
 	"altaStore/business/products"
 	"altaStore/modules/admins"
 	"altaStore/modules/categories"
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -83,11 +84,12 @@ func (repository *GormRepository) GetAllProducts(filter products.FilterProducts)
 		model = model.Where("title LIKE ?", filter.Query+"%")
 	}
 
-	if filter.Sort != "asc" {
-		// default
-		model = model.Order("created_at desc")
-	} else {
-		model = model.Order("created_at asc")
+	if filter.SortPrice == "asc" || filter.SortPrice == "desc" {
+		model = model.Order("price " + filter.SortPrice)
+	}
+
+	if filter.Sort == "asc" || filter.Sort == "desc" {
+		model = model.Order("created_at " + filter.Sort)
 	}
 
 	if filter.Price_max != 0 {
@@ -98,6 +100,12 @@ func (repository *GormRepository) GetAllProducts(filter products.FilterProducts)
 	if filter.Price_min != -1 {
 		// price min set
 		model = model.Where("price >= ?", filter.Price_min)
+	}
+
+	if filter.Status == "" || filter.Status == "active" {
+		model = model.Where("status = ?", "active")
+	} else {
+		model = model.Where("status != ?", "active")
 	}
 
 	if filter.Per_page != 100 {
@@ -153,6 +161,41 @@ func (repository *GormRepository) UpdateProducts(id_products int, products *prod
 		CategoriesID: products.CategoriesID,
 		Updated_at:   products.Updated_at,
 	}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpdateStocks , a method for  prodcust stocks, stocks exceeds minimum limit is 0
+func (repository *GormRepository) UpdateStocks(id_products, value int, operation string) error {
+	products, err := repository.GetDetailProducts(id_products)
+	if err != nil {
+		return err
+	}
+
+	currentStocks := products.Stock
+	if operation == "add" {
+		currentStocks = currentStocks + value
+	} else {
+		currentStocks = currentStocks - value
+		if currentStocks < 0 {
+			return errors.New("stock exceeds the minimum limit")
+		}
+	}
+
+	products_table := ConvertProductsToProductsTable(products)
+	err = repository.DB.Where("id = ?", id_products).Model(products_table).Updates(ProductsTable{
+		Stock: currentStocks,
+	}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repository *GormRepository) DeleteProducts(products *products.Products) error {
+	err := repository.DB.Where("id = ?", products.ID).Delete(&ProductsTable{}).Error
 	if err != nil {
 		return err
 	}

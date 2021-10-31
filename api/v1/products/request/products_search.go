@@ -16,6 +16,7 @@ func NewFilterProducts(c echo.Context) *products.FilterProducts {
 	query := c.QueryParam("query")
 
 	sort := c.QueryParam("sort")
+	sortPrice := c.QueryParam("sort_price")
 
 	price_max, err := strconv.Atoi(c.QueryParam("pmax"))
 	if err != nil {
@@ -41,13 +42,17 @@ func NewFilterProducts(c echo.Context) *products.FilterProducts {
 		per_page = 100
 	}
 
+	status := c.QueryParam("status")
+
 	return &products.FilterProducts{
 		CategoriesId: id_categories,
 		Query:        query,
 		Sort:         sort,
+		SortPrice:    sortPrice,
 		Price_max:    price_max,
 		Price_min:    price_min,
 		Page:         page,
 		Per_page:     per_page,
+		Status:       status,
 	}
 }

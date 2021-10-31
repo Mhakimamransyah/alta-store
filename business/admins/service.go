@@ -35,7 +35,8 @@ func InitAdminService(repository Repository) *service {
 func (admin_service *service) FindAllAdmin(offset, limit int) (*[]Admins, error) {
 	list_admins, err := admin_service.AdminsRepository.GetAdmin(limit, offset)
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
+		return nil, business.ErrNotFound
 	}
 	return list_admins, err
 }
@@ -43,7 +44,8 @@ func (admin_service *service) FindAllAdmin(offset, limit int) (*[]Admins, error)
 func (admin_service *service) FindAdminByUsername(username string) (*Admins, error) {
 	admins, err := admin_service.AdminsRepository.GetAdminByUsername(username)
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
+		return nil, business.ErrNotFound
 	}
 	return admins, err
 }
@@ -51,7 +53,8 @@ func (admin_service *service) FindAdminByUsername(username string) (*Admins, err
 func (admin_service *service) FindAdminById(id_admins int) (*Admins, error) {
 	admins, err := admin_service.AdminsRepository.GetAdminById(id_admins)
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
+		return nil, business.ErrNotFound
 	}
 	return admins, err
 }
@@ -60,7 +63,8 @@ func (admin_service *service) LoginAdmin(username, password string) (*Admins, er
 	// hashing data passwords
 	admin, err := admin_service.AdminsRepository.LoginAdmin(username, password)
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
+		return nil, business.ErrLoginAdmins
 	}
 	return admin, nil
 }
@@ -68,24 +72,24 @@ func (admin_service *service) LoginAdmin(username, password string) (*Admins, er
 func (admin_service *service) InsertAdmin(admin_spec AdminSpec, createdById int) error {
 	err := validator.GetValidator().Struct(admin_spec)
 	if err != nil {
+		fmt.Println(err)
 		return business.ErrInvalidSpec
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(admin_spec.Password), 0)
 
 	if err != nil {
-		return err
+		fmt.Println(err)
+		return business.ErrInternalServerError
 	}
 
-	// IF NOT MOCKED CREATE ADMIN
-	createdByUsername := "mock"
-	if createdById != -404 {
-		admin_requested, err := admin_service.AdminsRepository.GetAdminById(createdById)
-		if err != nil {
-			return business.ErrUnauthorized
-		}
-		createdByUsername = admin_requested.Name
+	admin_requested, err := admin_service.AdminsRepository.GetAdminById(createdById)
+	if err != nil {
+		fmt.Println(err)
+		return business.ErrUnauthorized
 	}
+
+	createdByUsername := admin_requested.Name
 
 	admin := NewAdmin(admin_spec.Name,
 		admin_spec.Username,
@@ -97,6 +101,7 @@ func (admin_service *service) InsertAdmin(admin_spec AdminSpec, createdById int)
 
 	err = admin_service.AdminsRepository.CreateAdmin(&admin)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 	return nil
@@ -105,19 +110,25 @@ func (admin_service *service) InsertAdmin(admin_spec AdminSpec, createdById int)
 func (admin_service *service) ModifyAdmin(username string, admin_updatable AdminUpdatable, modifiedBy int) error {
 	err := validator.GetValidator().Struct(admin_updatable)
 	if err != nil {
-		return err
-	}
-	fmt.Println(username)
-	admin_data, err := admin_service.AdminsRepository.GetAdminByUsername(username)
-	if err != nil {
-		return err
+		fmt.Println(err)
+		return business.ErrInvalidSpec
 	}
 
-	fmt.Println(admin_data)
+	admin_data, err := admin_service.AdminsRepository.GetAdminByUsername(username)
+	if err != nil {
+		fmt.Println(err)
+		return business.ErrNotFound
+	}
+
+	if admin_data.ID != modifiedBy {
+		return business.ErrUnauthorized
+	}
+
 	new_admin_data := admin_data.ModifyAdmin(admin_updatable)
 	err = admin_service.AdminsRepository.UpdateAdmin(&new_admin_data)
 	if err != nil {
-		return err
+		fmt.Println(err)
+		return business.ErrInternalServerError
 	}
 	return nil
 }

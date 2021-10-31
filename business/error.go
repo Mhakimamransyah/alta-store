@@ -18,6 +18,9 @@ var (
 	//ErrLogin Error when email or password is wrong
 	ErrLogin = errors.New("email or password is incorrect")
 
+	//ErrLogin Error when email or password is wrong
+	ErrLoginAdmins = errors.New("Username or password is incorrect")
+
 	//ErrRegister Error if duplicate email
 	ErrRegister = errors.New("email already registered")
 

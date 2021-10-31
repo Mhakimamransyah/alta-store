@@ -33,10 +33,10 @@ func (admin_service *Controller) GetAdminController(c echo.Context) error {
 	page, errorPage := strconv.Atoi(c.QueryParam("page"))
 	per_page, errorPerPage := strconv.Atoi(c.QueryParam("per_page"))
 	if errorPage != nil {
-		return c.JSON(common.NewBadRequestResponseWithMessage("Page query params undefined"))
+		page = 0
 	}
 	if errorPerPage != nil {
-		return c.JSON(common.NewBadRequestResponseWithMessage("Per Page query params undefined"))
+		per_page = 100
 	}
 	list_admin, err := admin_service.adminService.FindAllAdmin(page, per_page)
 	if err != nil {
