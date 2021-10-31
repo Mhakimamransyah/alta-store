@@ -52,7 +52,7 @@ func InitProductsService(products_repo Repository, products_img_repo productsima
 func (service *service) FindAllProducts(filter FilterProducts) (*[]Products, error) {
 	list_products, err := service.products_repository.GetAllProducts(filter)
 	if err != nil {
-		return nil, err
+		return nil, business.ErrNotFound
 	}
 
 	var list_products_with_products_images []Products
@@ -71,7 +71,7 @@ func (service *service) FindAllProducts(filter FilterProducts) (*[]Products, err
 func (service *service) DetailProducts(id_products int) (*Products, error) {
 	products, err := service.products_repository.GetDetailProducts(id_products)
 	if err != nil {
-		return nil, err
+		return nil, business.ErrNotFound
 	}
 	products_with_images, err := service.products_images_repository.GetListProductsImagesByIdProducts(products.ID)
 	products.Products_images = *products_with_images
@@ -81,12 +81,12 @@ func (service *service) DetailProducts(id_products int) (*Products, error) {
 func (service *service) InsertProducts(id_admin int, products_spec ProductsSpec, createdBy int) (*Products, error) {
 	err := validator.GetValidator().Struct(&products_spec)
 	if err != nil {
-		return nil, err
+		return nil, business.ErrInvalidSpec
 	}
 	products := NewProducts(id_admin, products_spec)
 	products, err = service.products_repository.CreateProducts(products, createdBy)
 	if err != nil {
-		return nil, err
+		return nil, business.ErrInternalServerError
 	}
 
 	return products, nil
@@ -95,11 +95,11 @@ func (service *service) InsertProducts(id_admin int, products_spec ProductsSpec,
 func (service *service) ModifyProducts(id_admin, id_products int, products_updatable ProductsUpdatable, modifiedBy int) error {
 	err := validator.GetValidator().Struct(&products_updatable)
 	if err != nil {
-		return err
+		return business.ErrInvalidSpec
 	}
 	products, err := service.products_repository.GetDetailProducts(id_products)
 	if err != nil {
-		return err
+		return business.ErrNotFound
 	}
 
 	// check if admin have authorized to edit product
@@ -111,7 +111,7 @@ func (service *service) ModifyProducts(id_admin, id_products int, products_updat
 
 	err = service.products_repository.UpdateProducts(id_products, new_products, modifiedBy)
 	if err != nil {
-		return err
+		return business.ErrInternalServerError
 	}
 	return nil
 }
@@ -119,14 +119,14 @@ func (service *service) ModifyProducts(id_admin, id_products int, products_updat
 func (service *service) RemoveProducts(id_products int, deletedById int) error {
 	products, err := service.products_repository.GetDetailProducts(id_products)
 	if err != nil {
-		return err
+		return business.ErrNotFound
 	}
 	if deletedById != products.AdminID {
 		return business.ErrUnauthorized
 	}
 	err = service.products_repository.DeleteProducts(products)
 	if err != nil {
-		return err
+		return business.ErrInternalServerError
 	}
 	return nil
 }

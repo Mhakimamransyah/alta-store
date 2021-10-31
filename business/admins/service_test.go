@@ -61,7 +61,7 @@ func TestLoginAdmin(t *testing.T) {
 
 		assert.Nil(t, admin)
 		assert.NotNil(t, err)
-		assert.Equal(t, err, business.ErrNotFound)
+		assert.Equal(t, err, business.ErrLoginAdmins)
 	})
 }
 
@@ -174,7 +174,7 @@ func TestModifyAdmin(t *testing.T) {
 	t.Run("Expects update admins success", func(t *testing.T) {
 		adminRepository.On("GetAdminByUsername", username).Return(&adminData, nil).Once()
 		adminRepository.On("UpdateAdmin", mock.AnythingOfType("*admins.Admins")).Return(nil).Once()
-		err := adminService.ModifyAdmin(username, adminUpdate, 2)
+		err := adminService.ModifyAdmin(username, adminUpdate, adminData.ID)
 		assert.Nil(t, err)
 	})
 

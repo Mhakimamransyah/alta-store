@@ -29,7 +29,7 @@ func (service *service) InsertNewImages(products_image *ProductImages, files []*
 func (service *service) RemoveProductsImages(id_admins, id_products, id_products_images int, deletedById int) error {
 	products_images, err := service.repository.GetProductsImagesById(id_products_images)
 	if err != nil {
-		return err
+		return business.ErrNotFound
 	}
 
 	// Check admin authority
@@ -39,7 +39,7 @@ func (service *service) RemoveProductsImages(id_admins, id_products, id_products
 
 	err = service.repository.DeleteProductsImages(products_images, deletedById)
 	if err != nil {
-		return err
+		return business.ErrInternalServerError
 	}
 
 	return nil

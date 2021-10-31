@@ -47,7 +47,6 @@ func RegisterPath(
 	cartV1.GET("", cartController.GetActiveCart)
 
 	e.POST("admins/login", adminController.LoginController)
-	e.POST("adminmockdata", adminController.CreateMockAdminController)
 
 	// Admin
 	admin := e.Group("v1/admins")

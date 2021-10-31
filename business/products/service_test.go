@@ -147,6 +147,31 @@ func TestModifyProducts(t *testing.T) {
 
 func TestRemoveProducts(t *testing.T) {
 
+	t.Run("Expects failed delete products, not found", func(t *testing.T) {
+		productsRepository.On("GetDetailProducts", mock.AnythingOfType("int")).Return(nil, business.ErrNotFound).Once()
+		err := productsService.RemoveProducts(100, AdminID)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("Expects success delete products", func(t *testing.T) {
+		productsRepository.On("GetDetailProducts", mock.AnythingOfType("int")).Return(&productsData, nil).Once()
+		productsRepository.On("DeleteProducts", &productsData).Return(nil).Once()
+		err := productsService.RemoveProducts(ProductsID, AdminID)
+		assert.Nil(t, err)
+	})
+
+	t.Run("Expects failed delete products, unauthorized access", func(t *testing.T) {
+		productsRepository.On("GetDetailProducts", mock.AnythingOfType("int")).Return(&productsData, nil).Once()
+		err := productsService.RemoveProducts(ProductsID, 100)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("Expects failed delete products", func(t *testing.T) {
+		productsRepository.On("GetDetailProducts", mock.AnythingOfType("int")).Return(&productsData, nil).Once()
+		productsRepository.On("DeleteProducts", &productsData).Return(business.ErrInternalServerError).Once()
+		err := productsService.RemoveProducts(ProductsID, AdminID)
+		assert.NotNil(t, err)
+	})
 }
 
 func setup() {
