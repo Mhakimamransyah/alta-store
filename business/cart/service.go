@@ -68,22 +68,45 @@ func (s *service) AddToCart(addToCartSpec AddToCartSpec) error {
 	}
 
 	productOnCart, err := s.repository.FindProductOnCartDetail(getActiveCart.ID, addToCartSpec.ProductID)
+
 	if err == nil {
+		operation := "add"
+		stock := productOnCart.Quantity
 		if addToCartSpec.Quantity == 0 || (addToCartSpec.Do == "subtraction" && addToCartSpec.Quantity > productOnCart.Quantity) { //delete from cart detail
-			//todo update stock (+ stock)
 			err = s.repository.UpdateQuantity(getActiveCart.ID, addToCartSpec.ProductID, 0)
+			if err != nil {
+				return err
+			}
+
+			err = s.productRepository.UpdateStocks(int(productOnCart.ProductID), int(stock), operation)
+			if err != nil {
+				return err
+			}
 		} else {
 			if addToCartSpec.Do == "addition" {
-				//todo update stock (- stock)
+				operation = "min"
+				stock = addToCartSpec.Quantity
+				err = s.productRepository.UpdateStocks(int(productOnCart.ProductID), int(stock), operation)
+				if err != nil {
+					return err
+				}
 				err = s.repository.UpdateQuantity(getActiveCart.ID, addToCartSpec.ProductID, productOnCart.Quantity+addToCartSpec.Quantity)
-			} else {
-				//todo update stock (+ stock)
-				err = s.repository.UpdateQuantity(getActiveCart.ID, addToCartSpec.ProductID, productOnCart.Quantity-addToCartSpec.Quantity)
-			}
-		}
+				if err != nil {
+					return err
+				}
 
-		if err != nil {
-			return err
+			} else {
+				err = s.repository.UpdateQuantity(getActiveCart.ID, addToCartSpec.ProductID, productOnCart.Quantity-addToCartSpec.Quantity)
+				if err != nil {
+					return err
+				}
+
+				stock = addToCartSpec.Quantity
+				err = s.productRepository.UpdateStocks(int(productOnCart.ProductID), int(stock), operation)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	} else {
 		if addToCartSpec.Do == "addition" {
