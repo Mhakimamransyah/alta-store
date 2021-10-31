@@ -15,10 +15,12 @@ type FilterProducts struct {
 	CategoriesId int
 	Query        string
 	Sort         string
+	SortPrice    string
 	Price_max    int
 	Price_min    int
 	Page         int
 	Per_page     int
+	Status       string
 }
 
 type ProductsSpec struct {
@@ -114,24 +116,17 @@ func (service *service) ModifyProducts(id_admin, id_products int, products_updat
 	return nil
 }
 
-func (service *service) RemoveProductsImages(id_products, id_products_images int, deletedById int) error {
-	products_images, err := service.products_images_repository.GetProductsImagesById(id_products_images)
+func (service *service) RemoveProducts(id_products int, deletedById int) error {
+	products, err := service.products_repository.GetDetailProducts(id_products)
 	if err != nil {
 		return err
 	}
-	products, err := service.products_repository.GetDetailProducts(products_images.Products_ID)
-	if err != nil {
-		return err
-	}
-	// Check admin authority
-	if products.AdminID != deletedById {
+	if deletedById != products.AdminID {
 		return business.ErrUnauthorized
 	}
-
-	err = service.products_images_repository.DeleteProductsImages(products_images, deletedById)
+	err = service.products_repository.DeleteProducts(products)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }

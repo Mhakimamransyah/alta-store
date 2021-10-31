@@ -1,6 +1,7 @@
 package productsimages
 
 import (
+	"altaStore/business"
 	"mime/multipart"
 )
 
@@ -18,8 +19,27 @@ func (service *service) InsertNewImages(products_image *ProductImages, files []*
 	for _, img := range files {
 		err := service.repository.CreateImages(products_image, img, createdBy)
 		if err != nil {
-			return err
+			continue
 		}
+	}
+
+	return nil
+}
+
+func (service *service) RemoveProductsImages(id_admins, id_products, id_products_images int, deletedById int) error {
+	products_images, err := service.repository.GetProductsImagesById(id_products_images)
+	if err != nil {
+		return err
+	}
+
+	// Check admin authority
+	if id_admins != deletedById {
+		return business.ErrUnauthorized
+	}
+
+	err = service.repository.DeleteProductsImages(products_images, deletedById)
+	if err != nil {
+		return err
 	}
 
 	return nil

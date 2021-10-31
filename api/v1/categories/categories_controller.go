@@ -3,6 +3,7 @@ package categories
 import (
 	"altaStore/api/common"
 	"altaStore/api/middleware"
+	"altaStore/api/v1/categories/request"
 	"altaStore/business/categories"
 	"strconv"
 
@@ -20,15 +21,8 @@ func InitCategoriesController(service categories.Service) *Controller {
 }
 
 func (service *Controller) GetAllCategoriesController(c echo.Context) error {
-	page, errorPage := strconv.Atoi(c.QueryParam("page"))
-	per_page, errorPerPage := strconv.Atoi(c.QueryParam("per_page"))
-	if errorPage != nil {
-		return c.JSON(common.NewBadRequestResponseWithMessage("Page query params undefined"))
-	}
-	if errorPerPage != nil {
-		return c.JSON(common.NewBadRequestResponseWithMessage("Per Page query params undefined"))
-	}
-	data, err := service.categories_service.FindAllCategories(per_page, page)
+	filter := request.NewFilterProducts(c)
+	data, err := service.categories_service.FindAllCategories(filter)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
@@ -36,19 +30,12 @@ func (service *Controller) GetAllCategoriesController(c echo.Context) error {
 }
 
 func (service *Controller) GetAllSubCategoriesController(c echo.Context) error {
-	page, errorPage := strconv.Atoi(c.QueryParam("page"))
-	per_page, errorPerPage := strconv.Atoi(c.QueryParam("per_page"))
-	if errorPage != nil {
-		return c.JSON(common.NewBadRequestResponseWithMessage("Page query params undefined"))
-	}
-	if errorPerPage != nil {
-		return c.JSON(common.NewBadRequestResponseWithMessage("Per Page query params undefined"))
-	}
+	filter := request.NewFilterProducts(c)
 	id_categories, err := strconv.Atoi(c.Param("id_categories"))
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
-	data, err := service.categories_service.FindAllSubCategories(id_categories, per_page, page)
+	data, err := service.categories_service.FindAllSubCategories(id_categories, filter)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}

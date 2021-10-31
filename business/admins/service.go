@@ -3,7 +3,6 @@ package admins
 import (
 	"altaStore/business"
 	"altaStore/util/validator"
-	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -77,15 +76,12 @@ func (admin_service *service) InsertAdmin(admin_spec AdminSpec, createdById int)
 		return err
 	}
 
-	// IF NOT MOCKED CREATE ADMIN
-	createdByUsername := "mock"
-	if createdById != -404 {
-		admin_requested, err := admin_service.AdminsRepository.GetAdminById(createdById)
-		if err != nil {
-			return business.ErrUnauthorized
-		}
-		createdByUsername = admin_requested.Name
+	admin_requested, err := admin_service.AdminsRepository.GetAdminById(createdById)
+	if err != nil {
+		return business.ErrUnauthorized
 	}
+
+	createdByUsername := admin_requested.Name
 
 	admin := NewAdmin(admin_spec.Name,
 		admin_spec.Username,
@@ -107,13 +103,12 @@ func (admin_service *service) ModifyAdmin(username string, admin_updatable Admin
 	if err != nil {
 		return err
 	}
-	fmt.Println(username)
+
 	admin_data, err := admin_service.AdminsRepository.GetAdminByUsername(username)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(admin_data)
 	new_admin_data := admin_data.ModifyAdmin(admin_updatable)
 	err = admin_service.AdminsRepository.UpdateAdmin(&new_admin_data)
 	if err != nil {

@@ -4,9 +4,12 @@ import (
 	productsimages "altaStore/business/products_images"
 	"altaStore/modules/products"
 	"bytes"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
 	awsSession "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 
@@ -136,17 +139,45 @@ func (repository *GormRepository) GetListProductsImagesByIdProducts(id_products 
 
 func (repository *GormRepository) DeleteProductsImages(products_images *productsimages.ProductImages, deletedById int) error {
 	products_images_table := ConvertProductsImagesToProductsImagesTable(products_images)
-	path := folder + "/" + products_images_table.FileName
 	err := repository.DB.Where("id = ?", products_images.ID).Delete(&products_images_table).Error
 	if err != nil {
 		return err
 	}
 
 	// remove file system
-	err = os.Remove(path)
+
+	svc := s3.New(session.New(&aws.Config{
+		Region: aws.String(S3_REGION),
+		Credentials: credentials.NewStaticCredentials(
+			os.Getenv("ALTASTORE_S3_ID"),
+			os.Getenv("ALTASTORE_S3_KEY"),
+			"",
+		),
+	}))
+
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
+
+	input := &s3.DeleteObjectInput{
+		Bucket: aws.String(S3_BUCKET),
+		Key:    aws.String("products-images/" + products_images.FileName),
+	}
+
+	_, err = svc.DeleteObject(input)
+
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				return aerr
+			}
+		} else {
+			return err
+		}
+	}
+
 	return nil
 }
 

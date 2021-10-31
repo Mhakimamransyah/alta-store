@@ -45,8 +45,8 @@ func ConvertCategoriesTableToCategories(categories_table *CategoriesTable) *cate
 		Status:     categories_table.Status,
 		Parent_id:  categories_table.ParentID,
 		AdminID:    categories_table.AdminID,
-		Created_at: categories_table.CreatedAt,
-		Updated_at: categories_table.UpdatedAt,
+		Created_at: categories_table.Created_at,
+		Updated_at: categories_table.Updated_at,
 		Deleted_at: categories_table.Deleted_at,
 	}
 }
@@ -79,9 +79,10 @@ func (repository *GormRepository) UpdateCategories(categories *categories.Catego
 	return nil
 }
 
-func (repository *GormRepository) GetCategories(limit, offset int) (*[]categories.Categories, error) {
+func (repository *GormRepository) GetCategories(categories_search *categories.FilterCategories) (*[]categories.Categories, error) {
 	var list_categories_tables []CategoriesTable
-	err := repository.DB.Where("parent_id IS NULL AND status = ?", "active").Limit(limit).Offset(offset - 1).Find(&list_categories_tables).Error
+	model := repository.setCategoriesFilter(categories_search).Where("parent_id IS NULL")
+	err := model.Find(&list_categories_tables).Error
 	if err != nil {
 		return nil, err
 	}
@@ -102,9 +103,10 @@ func (repository *GormRepository) CountChildCategories(categories categories.Cat
 	return &categories
 }
 
-func (repository *GormRepository) GetSubCategories(id_categories, limit, offset int) (*[]categories.Categories, error) {
+func (repository *GormRepository) GetSubCategories(id_categories int, categories_search *categories.FilterCategories) (*[]categories.Categories, error) {
 	var list_categories_tables []CategoriesTable
-	err := repository.DB.Where("status = ? AND parent_id = ?", "active", id_categories).Offset(offset).Limit(limit).Find(&list_categories_tables).Error
+	model := repository.setCategoriesFilter(categories_search).Where("parent_id = ?", id_categories)
+	err := model.Find(&list_categories_tables).Error
 	if err != nil {
 		return nil, err
 
@@ -133,4 +135,42 @@ func (repository *GormRepository) GetCategoriesById(id_categories int) (*categor
 		return nil, err
 	}
 	return ConvertCategoriesTableToCategories(&categories_table), nil
+}
+
+func (repository *GormRepository) setCategoriesFilter(filter_Categories *categories.FilterCategories) *gorm.DB {
+	model := repository.DB
+	if filter_Categories.AdminId != 0 {
+		model = model.Where("admin_id = ?", filter_Categories.AdminId)
+	}
+	if filter_Categories.Query != "" {
+		model = model.Where("name LIKE ?", filter_Categories.Query+"%")
+	}
+
+	if filter_Categories.Status != "active" {
+		model = model.Where("status != ?", "active")
+	} else {
+		model = model.Where("status = ?", "active")
+	}
+
+	if filter_Categories.SortName == "asc" || filter_Categories.SortName == "desc" {
+		model = model.Order("name " + filter_Categories.SortName)
+	}
+
+	if filter_Categories.SortDate != "asc" || filter_Categories.SortDate == "desc" {
+		model = model.Order("created_at " + filter_Categories.SortDate)
+	}
+
+	if filter_Categories.Offset != 0 {
+		model = model.Offset(filter_Categories.Offset - 1)
+	} else {
+		model = model.Offset(0)
+	}
+
+	if filter_Categories.Limit != 0 {
+		model = model.Limit(filter_Categories.Limit)
+	} else {
+		model = model.Limit(100)
+	}
+
+	return model
 }

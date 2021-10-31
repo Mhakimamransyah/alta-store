@@ -3,11 +3,20 @@ package categories
 import (
 	"altaStore/business"
 	"altaStore/util/validator"
-	"errors"
 )
 
 type service struct {
 	repository Repository
+}
+
+type FilterCategories struct {
+	Query    string
+	SortName string
+	SortDate string
+	AdminId  int
+	Status   string
+	Limit    int
+	Offset   int
 }
 
 type CategoriesSpec struct {
@@ -27,16 +36,16 @@ func InitCategoriesService(repository Repository) *service {
 	}
 }
 
-func (service *service) FindAllCategories(limit, offset int) (*[]Categories, error) {
-	list, err := service.repository.GetCategories(limit, offset)
+func (service *service) FindAllCategories(categories_search *FilterCategories) (*[]Categories, error) {
+	list, err := service.repository.GetCategories(categories_search)
 	if err != nil {
 		return nil, err
 	}
 	return list, nil
 }
 
-func (service *service) FindAllSubCategories(id_categories, limit, offset int) (*[]Categories, error) {
-	list, err := service.repository.GetSubCategories(id_categories, limit, offset)
+func (service *service) FindAllSubCategories(id_categories int, categories_search *FilterCategories) (*[]Categories, error) {
+	list, err := service.repository.GetSubCategories(id_categories, categories_search)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +61,7 @@ func (service *service) InsertCategories(categories_spec CategoriesSpec, id_admi
 	if categories_spec.ParentID != 0 {
 		_, err := service.repository.GetCategoriesById(categories_spec.ParentID)
 		if err != nil {
-			return errors.New("Parent ID not found")
+			return business.ErrNotFound
 		}
 	}
 	categories_spec.AdminID = id_admin
