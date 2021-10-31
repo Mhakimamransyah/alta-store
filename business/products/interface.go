@@ -14,5 +14,5 @@ type Repository interface {
 	CreateProducts(products *Products, createdById int) (*Products, error)
 	UpdateProducts(id_products int, products *Products, modifiedById int) error
 	DeleteProducts(products *Products) error
-	ReduceStocks(cost_reduce, id_products int) error
+	UpdateStocks(id_products, value int, operation string) error
 }

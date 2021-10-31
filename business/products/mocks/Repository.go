@@ -96,20 +96,6 @@ func (_m *Repository) GetDetailProducts(id_products int) (*products.Products, er
 	return r0, r1
 }
 
-// ReduceStocks provides a mock function with given fields: cost_reduce, id_products
-func (_m *Repository) ReduceStocks(cost_reduce int, id_products int) error {
-	ret := _m.Called(cost_reduce, id_products)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(int, int) error); ok {
-		r0 = rf(cost_reduce, id_products)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // UpdateProducts provides a mock function with given fields: id_products, _a1, modifiedById
 func (_m *Repository) UpdateProducts(id_products int, _a1 *products.Products, modifiedById int) error {
 	ret := _m.Called(id_products, _a1, modifiedById)
@@ -117,6 +103,20 @@ func (_m *Repository) UpdateProducts(id_products int, _a1 *products.Products, mo
 	var r0 error
 	if rf, ok := ret.Get(0).(func(int, *products.Products, int) error); ok {
 		r0 = rf(id_products, _a1, modifiedById)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateStocks provides a mock function with given fields: id_products, value, operation
+func (_m *Repository) UpdateStocks(id_products int, value int, operation string) error {
+	ret := _m.Called(id_products, value, operation)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int, int, string) error); ok {
+		r0 = rf(id_products, value, operation)
 	} else {
 		r0 = ret.Error(0)
 	}

@@ -167,16 +167,23 @@ func (repository *GormRepository) UpdateProducts(id_products int, products *prod
 	return nil
 }
 
-// ReduceStocks , a method for reduce prodcust stocks, stocks exceeds minimum limit is 0
-func (repository *GormRepository) ReduceStocks(cost_reduce, id_products int) error {
+// UpdateStocks , a method for  prodcust stocks, stocks exceeds minimum limit is 0
+func (repository *GormRepository) UpdateStocks(id_products, value int, operation string) error {
 	products, err := repository.GetDetailProducts(id_products)
 	if err != nil {
 		return err
 	}
-	currentStocks := products.Stock - cost_reduce
-	if currentStocks < 0 {
-		return errors.New("stock exceeds the minimum limit")
+
+	currentStocks := products.Stock
+	if operation == "add" {
+		currentStocks = currentStocks + value
+	} else {
+		currentStocks = currentStocks - value
+		if currentStocks < 0 {
+			return errors.New("stock exceeds the minimum limit")
+		}
 	}
+
 	products_table := ConvertProductsToProductsTable(products)
 	err = repository.DB.Where("id = ?", id_products).Model(products_table).Updates(ProductsTable{
 		Stock: currentStocks,
