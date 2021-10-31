@@ -200,3 +200,35 @@ func (repo *GormRepository) UpdateAddressID(cartID uint, addressID uint) error {
 
 	return nil
 }
+
+func (repo *GormRepository) FindCartByID(cartID uint) (*cart.Cart, error) {
+
+	var cartData Cart
+
+	err := repo.DB.Where("id = ?", cartID).First(&cartData).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	cart := cartData.CartToService()
+
+	return &cart, nil
+
+}
+
+func (repo *GormRepository) GetAllCartIDTransaction(userID uint) ([]cart.Cart, error) {
+	var carts []Cart
+
+	err := repo.DB.Where("user_id = ?", userID).Where("status <> ?", "active").Find(&carts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var result []cart.Cart
+	for _, value := range carts {
+		result = append(result, value.CartToService())
+	}
+
+	return result, nil
+}

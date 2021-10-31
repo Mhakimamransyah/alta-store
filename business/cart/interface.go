@@ -31,4 +31,8 @@ type Repository interface {
 	UpdateStatusCart(cartID uint, status string) error
 
 	UpdateAddressID(cartID, addressID uint) error
+
+	FindCartByID(cartID uint) (*Cart, error)
+
+	GetAllCartIDTransaction(userID uint) ([]Cart, error)
 }

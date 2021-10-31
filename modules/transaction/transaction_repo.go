@@ -79,3 +79,42 @@ func (repo *GormRepository) CreateTransaction(transaction transaction.Transactio
 
 	return nil
 }
+
+func (repo *GormRepository) FindTransactionByInvoice(invoiceNumber string) (*transaction.Transaction, error) {
+	var transactionData Transaction
+
+	err := repo.DB.Where("invoice_number = ?", invoiceNumber).First(&transactionData).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	transaction := transactionData.TransactionToService()
+
+	return &transaction, nil
+}
+
+func (repo *GormRepository) FindAllTransaction(listCartID []uint) ([]transaction.Transaction, error) {
+	var transactions []Transaction
+
+	err := repo.DB.Where("cart_id IN ?", listCartID).Find(&transactions).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var result []transaction.Transaction
+	for _, value := range transactions {
+		result = append(result, value.TransactionToService())
+	}
+
+	return result, nil
+}
+
+func (repo *GormRepository) UpdateTransactionStatus(invoiceNumber, status string) error {
+	err := repo.DB.Model(&Transaction{}).Where("invoice_number = ?", invoiceNumber).Update("status", status).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -20,6 +20,8 @@ const (
 	errAddressNotFound     errorBusinessResponseCode = "address_not_found"
 	errProductNotFound     errorBusinessResponseCode = "product_not_found"
 	errProductOOS          errorBusinessResponseCode = "insufficient_product_stock"
+	errTransactionNotFound errorBusinessResponseCode = "transaction_not_found"
+	errTransactioAccess    errorBusinessResponseCode = "invalid invoice number"
 )
 
 //BusinessResponse default payload response
@@ -61,6 +63,10 @@ func errorMapping(err error) (int, BusinessResponse) {
 		return newErrorProductNotFound(err.Error())
 	case business.ErrProductOOS:
 		return newErrorProductOOS(err.Error())
+	case business.ErrTransactionNotFound:
+		return newErrorTransactionNotFound(err.Error())
+	case business.ErrTransactionAccess:
+		return newErrorTransactionAccess(err.Error())
 	}
 }
 
@@ -161,6 +167,22 @@ func newErrorProductNotFound(message string) (int, BusinessResponse) {
 func newErrorProductOOS(message string) (int, BusinessResponse) {
 	return http.StatusUnprocessableEntity, BusinessResponse{
 		errProductOOS,
+		message,
+		map[string]interface{}{},
+	}
+}
+
+func newErrorTransactionNotFound(message string) (int, BusinessResponse) {
+	return http.StatusNotFound, BusinessResponse{
+		errTransactionNotFound,
+		message,
+		map[string]interface{}{},
+	}
+}
+
+func newErrorTransactionAccess(message string) (int, BusinessResponse) {
+	return http.StatusForbidden, BusinessResponse{
+		errTransactioAccess,
 		message,
 		map[string]interface{}{},
 	}

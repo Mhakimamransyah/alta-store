@@ -166,3 +166,17 @@ func (repo *GormRepository) GetAddressForTransaction(userID, addressID uint) (*a
 	return &address, nil
 
 }
+
+func (repo *GormRepository) GetAddressByID(addressID uint) (*address.TransactionAddress, error) {
+	var userAddress Address
+
+	err := repo.DB.Where("id = ?", addressID).First(&userAddress).Error
+	if err != nil {
+		return nil, err
+	}
+
+	address := userAddress.ToTransactionAddress()
+
+	return &address, nil
+
+}

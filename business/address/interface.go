@@ -6,9 +6,6 @@ type Service interface {
 	GetAllAddress(userID uint) ([]Address, error)
 
 	GetDefaultAddress(userID uint) (*Address, error)
-
-	// FindAllUser(skip int, rowPerPage int) ([]User, error)
-
 }
 
 //Repository ingoing port for user
@@ -22,4 +19,6 @@ type Repository interface {
 	UpdateDefaultAddress(address Address) error
 
 	GetAddressForTransaction(userID, addressID uint) (*TransactionAddress, error)
+
+	GetAddressByID(addressID uint) (*TransactionAddress, error)
 }

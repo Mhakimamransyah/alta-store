@@ -41,4 +41,10 @@ var (
 
 	//ErrProductOOS error if stock product not enough
 	ErrProductOOS = errors.New("insufficient product stock")
+
+	//ErrTransactionNotFound error if transaction not found
+	ErrTransactionNotFound = errors.New("transaction not found")
+
+	//ErrTransactionAccess error if try to get transaction another user
+	ErrTransactionAccess = errors.New("invalid invoice number")
 )

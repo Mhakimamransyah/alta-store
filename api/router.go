@@ -88,9 +88,11 @@ func RegisterPath(
 	e.GET("/products_img/*", echo.WrapHandler(http.StripPrefix("/products_img/", fs)))
 
 	// Transaction
-	transaction := e.Group("/v1")
+	transaction := e.Group("/v1/transaction")
 	transaction.Use(middleware.JWTMiddleware())
-	transaction.POST("/checkout", transactionController.Checkout)
+	transaction.POST("", transactionController.Checkout)
+	transaction.GET("", transactionController.GetAllTransaction)
+	transaction.GET("/invoice", transactionController.GetTransactionByInvoice)
 
 	//health check
 	e.GET("/health", func(c echo.Context) error {

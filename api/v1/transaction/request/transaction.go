@@ -9,6 +9,10 @@ type CheckoutRequest struct {
 	AddressID   uint `validate:"gte=0"`
 }
 
+type Invoice struct {
+	invoiceNumber string `validate:"required"`
+}
+
 func (req *CheckoutRequest) ToCheckoutSpec() *transaction.CheckoutSpec {
 
 	var checkoutSpec transaction.CheckoutSpec
@@ -17,4 +21,10 @@ func (req *CheckoutRequest) ToCheckoutSpec() *transaction.CheckoutSpec {
 	checkoutSpec.ShippingFee = req.ShippingFee
 	checkoutSpec.AddressID = req.AddressID
 	return &checkoutSpec
+}
+
+func (req *Invoice) ToInvoice() *Invoice {
+	var invoice Invoice
+	invoice.invoiceNumber = req.invoiceNumber
+	return &invoice
 }

@@ -125,3 +125,69 @@ func (s *service) Checkout(checkoutSpec CheckoutSpec) (*CheckoutResponse, error)
 	)
 	return &response, nil
 }
+
+func (s *service) FindTransactionByInvoice(invoiceNumber string, userID uint) (*CheckoutResponse, error) {
+	response := CheckoutResponse{}
+
+	transactionData, err := s.repository.FindTransactionByInvoice(invoiceNumber)
+
+	if err != nil {
+		return nil, business.ErrTransactionNotFound
+	}
+
+	cart, _ := s.cartRepository.FindCartByID(transactionData.CartID)
+
+	if cart.UserID != userID {
+		return nil, business.ErrTransactionAccess
+	}
+
+	addressTransaction, _ := s.addressRepository.GetAddressByID(*cart.AddressID)
+	newAddress := ToAddressResponse(*addressTransaction)
+
+	cartDetails, _ := s.cartRepository.GetCartDetailByCartID(transactionData.CartID)
+
+	var product *products.Products
+	var transactionProductList []Product
+
+	for _, value := range cartDetails {
+		product, _ = s.productRepository.GetDetailProducts(int(value.ProductID))
+		transactionProductList = append(transactionProductList, ToTransactionProduct(*product, value.Price, value.Quantity))
+	}
+
+	response = ToCheckoutResponse(
+		transactionData.InvoiceNumber,
+		RekBank,
+		RekNumber,
+		RekName,
+		transactionData.CreatedAt,
+		transactionData.TotalTransaction,
+		transactionData.ShippingFee,
+		(transactionData.TotalTransaction + transactionData.ShippingFee),
+		newAddress,
+		transactionProductList,
+	)
+	return &response, nil
+}
+
+func (s *service) GetAllTransaction(userID uint) ([]*CheckoutResponse, error) {
+	transactions := []*CheckoutResponse{}
+	var cartID []uint
+	carts, err := s.cartRepository.GetAllCartIDTransaction(userID)
+
+	if err != nil {
+		return nil, business.ErrNotFound
+	}
+
+	for _, value := range carts {
+		cartID = append(cartID, value.ID)
+	}
+
+	listTransaction, _ := s.repository.FindAllTransaction(cartID)
+
+	for _, value := range listTransaction {
+		trx, _ := s.FindTransactionByInvoice(value.InvoiceNumber, userID)
+		transactions = append(transactions, trx)
+	}
+
+	return transactions, nil
+}
