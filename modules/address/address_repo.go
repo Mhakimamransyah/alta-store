@@ -70,6 +70,21 @@ func (col *Address) ToAddress() address.Address {
 	return address
 }
 
+func (col *Address) ToTransactionAddress() address.TransactionAddress {
+	var address address.TransactionAddress
+
+	address.Name = col.Name
+	address.PhoneNumber = col.PhoneNumber
+	address.Street = col.Street
+	address.City = col.City
+	address.Province = col.Province
+	address.District = col.District
+	address.PostalCode = col.PostalCode
+	address.AddressType = col.AddressType
+
+	return address
+}
+
 //NewGormDBRepository Generate Gorm DB user repository
 func NewGormDBRepository(db *gorm.DB) *GormRepository {
 	return &GormRepository{
@@ -136,4 +151,18 @@ func (repo *GormRepository) GetAllAddress(userID uint) ([]address.Address, error
 	}
 
 	return result, nil
+}
+
+func (repo *GormRepository) GetAddressForTransaction(userID, addressID uint) (*address.TransactionAddress, error) {
+	var userAddress Address
+
+	err := repo.DB.Where("id = ?", addressID).Where("user_id = ?", userID).First(&userAddress).Error
+	if err != nil {
+		return nil, err
+	}
+
+	address := userAddress.ToTransactionAddress()
+
+	return &address, nil
+
 }

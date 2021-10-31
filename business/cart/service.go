@@ -2,6 +2,7 @@ package cart
 
 import (
 	"altaStore/business"
+	"altaStore/business/products"
 	"altaStore/util/validator"
 	"time"
 )
@@ -17,13 +18,17 @@ type AddToCartSpec struct {
 
 //=============== The implementation of those interface put below =======================
 type service struct {
-	repository Repository
+	repository        Repository
+	productRepository products.Repository
 }
 
 //NewService Construct user service object
-func NewService(repository Repository) Service {
+func NewService(
+	repository Repository,
+	productRepo products.Repository) Service {
 	return &service{
 		repository,
+		productRepo,
 	}
 }
 
@@ -49,14 +54,30 @@ func (s *service) AddToCart(addToCartSpec AddToCartSpec) error {
 		getActiveCart, _ = s.repository.GetActiveCart(addToCartSpec.UserID)
 	}
 
+	var product *products.Products
+	product, err = s.productRepository.GetDetailProducts(int(addToCartSpec.ProductID))
+
+	if err != nil {
+		return business.ErrProductNotFound
+	}
+
+	if addToCartSpec.Do == "addition" {
+		if product.Stock < int(addToCartSpec.Quantity) {
+			return business.ErrProductOOS
+		}
+	}
+
 	productOnCart, err := s.repository.FindProductOnCartDetail(getActiveCart.ID, addToCartSpec.ProductID)
 	if err == nil {
 		if addToCartSpec.Quantity == 0 || (addToCartSpec.Do == "subtraction" && addToCartSpec.Quantity > productOnCart.Quantity) { //delete from cart detail
+			//todo update stock (+ stock)
 			err = s.repository.UpdateQuantity(getActiveCart.ID, addToCartSpec.ProductID, 0)
 		} else {
 			if addToCartSpec.Do == "addition" {
+				//todo update stock (- stock)
 				err = s.repository.UpdateQuantity(getActiveCart.ID, addToCartSpec.ProductID, productOnCart.Quantity+addToCartSpec.Quantity)
 			} else {
+				//todo update stock (+ stock)
 				err = s.repository.UpdateQuantity(getActiveCart.ID, addToCartSpec.ProductID, productOnCart.Quantity-addToCartSpec.Quantity)
 			}
 		}
@@ -101,9 +122,13 @@ func (s *service) GetActiveCart(userID uint) (ActiveCart, error) {
 	}
 
 	var cartDetailsResult []ActiveCartDetail
+	var productFromRepo *products.Products
+	var simpleProduct ProductCart
 
 	for _, value := range cartDetails {
-		cartDetailsResult = append(cartDetailsResult, ToActiveCartDetail(value))
+		productFromRepo, _ = s.productRepository.GetDetailProducts(int(value.ProductID))
+		simpleProduct = ToProductCart(*productFromRepo)
+		cartDetailsResult = append(cartDetailsResult, ToActiveCartDetail(value, simpleProduct))
 	}
 
 	result = MergeCart(getActiveCart.ID, getActiveCart.Status, getActiveCart.AddressID, cartDetailsResult)

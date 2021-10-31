@@ -18,7 +18,7 @@ type Cart struct {
 	AddressID *uint  `json:"address_id"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt *time.Time `soft_delete.DeletedAt`
+	DeletedAt *time.Time
 }
 
 type CartDetail struct {
@@ -63,12 +63,6 @@ func newCartDetailTable(cartDetail cart.CartDetail) *CartDetail {
 
 //NewGormDBRepository Generate Gorm DB user repository
 func NewGormDBRepository(db *gorm.DB) *GormRepository {
-	return &GormRepository{
-		db,
-	}
-}
-
-func NewGormDBRepositoryWithDeleted(db *gorm.DB) *GormRepository {
 	return &GormRepository{
 		db,
 	}
@@ -184,6 +178,24 @@ func (repo *GormRepository) UpdateQuantity(cartID, productID, qty uint) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (repo *GormRepository) UpdateStatusCart(cartID uint, status string) error {
+	err := repo.DB.Model(&Cart{}).Where("id = ?", cartID).Update("status", status).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *GormRepository) UpdateAddressID(cartID uint, addressID uint) error {
+	err := repo.DB.Model(&Cart{}).Where("id = ?", cartID).Update("address_id", addressID).Error
+	if err != nil {
+		return err
 	}
 
 	return nil

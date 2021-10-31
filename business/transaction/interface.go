@@ -1,7 +1,7 @@
 package transaction
 
 type Service interface {
-	CreateTransaction(CreateTransactionSpec) error
+	Checkout(CheckoutSpec) (*CheckoutResponse, error)
 }
 
 type Repository interface {

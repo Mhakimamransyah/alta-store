@@ -14,7 +14,12 @@ const (
 	errInvalidSpec         errorBusinessResponseCode = "invalid_spec"
 	errLogin               errorBusinessResponseCode = "unauthorize"
 	errRegister            errorBusinessResponseCode = "conflict"
-	ErrAddToCart           errorBusinessResponseCode = "invalid_spec"
+	errAddToCart           errorBusinessResponseCode = "invalid_spec"
+	errActiveCartNotFound  errorBusinessResponseCode = "cart_not_found"
+	errCartDetailEmpty     errorBusinessResponseCode = "active_cart_empty"
+	errAddressNotFound     errorBusinessResponseCode = "address_not_found"
+	errProductNotFound     errorBusinessResponseCode = "product_not_found"
+	errProductOOS          errorBusinessResponseCode = "insufficient_product_stock"
 )
 
 //BusinessResponse default payload response
@@ -46,6 +51,16 @@ func errorMapping(err error) (int, BusinessResponse) {
 		return newErrorRegister(err.Error())
 	case business.ErrAddToCart:
 		return newErrorRegister(err.Error())
+	case business.ErrActiveCartNotFound:
+		return newErrorActiveCartNotFound(err.Error())
+	case business.ErrCartDetailEmpty:
+		return newErrorCartDetailEmpty(err.Error())
+	case business.ErrAddressNotFound:
+		return newErrorAddressNotFound(err.Error())
+	case business.ErrProductNotFound:
+		return newErrorProductNotFound(err.Error())
+	case business.ErrProductOOS:
+		return newErrorProductOOS(err.Error())
 	}
 }
 
@@ -103,10 +118,49 @@ func newErrorRegister(message string) (int, BusinessResponse) {
 	}
 }
 
-//newErrorRegister failed to Login
 func newErrorAddToCart(message string) (int, BusinessResponse) {
 	return http.StatusBadRequest, BusinessResponse{
-		ErrAddToCart,
+		errAddToCart,
+		message,
+		map[string]interface{}{},
+	}
+}
+
+func newErrorActiveCartNotFound(message string) (int, BusinessResponse) {
+	return http.StatusNotFound, BusinessResponse{
+		errActiveCartNotFound,
+		message,
+		map[string]interface{}{},
+	}
+}
+
+func newErrorCartDetailEmpty(message string) (int, BusinessResponse) {
+	return http.StatusUnprocessableEntity, BusinessResponse{
+		errCartDetailEmpty,
+		message,
+		map[string]interface{}{},
+	}
+}
+
+func newErrorAddressNotFound(message string) (int, BusinessResponse) {
+	return http.StatusNotFound, BusinessResponse{
+		errAddressNotFound,
+		message,
+		map[string]interface{}{},
+	}
+}
+
+func newErrorProductNotFound(message string) (int, BusinessResponse) {
+	return http.StatusNotFound, BusinessResponse{
+		errProductNotFound,
+		message,
+		map[string]interface{}{},
+	}
+}
+
+func newErrorProductOOS(message string) (int, BusinessResponse) {
+	return http.StatusUnprocessableEntity, BusinessResponse{
+		errProductOOS,
 		message,
 		map[string]interface{}{},
 	}

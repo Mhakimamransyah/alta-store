@@ -123,3 +123,17 @@ func (_m *Repository) UpdateQuantity(cartID uint, productID uint, qty uint) erro
 
 	return r0
 }
+
+// UpdateStatusCart provides a mock function with given fields: cartID, status
+func (_m *Repository) UpdateStatusCart(cartID uint, status string) error {
+	ret := _m.Called(cartID, status)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint, string) error); ok {
+		r0 = rf(cartID, status)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}

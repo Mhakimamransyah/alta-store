@@ -21,6 +21,5 @@ type Repository interface {
 
 	UpdateDefaultAddress(address Address) error
 
-	// FindAllUser(skip int, rowPerPage int) ([]User, error)
-
+	GetAddressForTransaction(userID, addressID uint) (*TransactionAddress, error)
 }

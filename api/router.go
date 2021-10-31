@@ -8,6 +8,7 @@ import (
 	"altaStore/api/v1/cart"
 	"altaStore/api/v1/categories"
 	"altaStore/api/v1/products"
+	"altaStore/api/v1/transaction"
 	"altaStore/api/v1/user"
 
 	"net/http"
@@ -24,7 +25,8 @@ func RegisterPath(
 	cartController *cart.Controller,
 	adminController *admins.Controller,
 	categoriesController *categories.Controller,
-	productsController *products.Controller) {
+	productsController *products.Controller,
+	transactionController *transaction.Controller) {
 	// if authController == nil || userController == nil || addressController == nil || cartController == nil {
 	// 	panic("Controller parameter cannot be nil")
 	// }
@@ -84,6 +86,11 @@ func RegisterPath(
 	// Products Images
 	fs := http.FileServer(http.Dir("products_image/"))
 	e.GET("/products_img/*", echo.WrapHandler(http.StripPrefix("/products_img/", fs)))
+
+	// Transaction
+	transaction := e.Group("/v1")
+	transaction.Use(middleware.JWTMiddleware())
+	transaction.POST("/checkout", transactionController.Checkout)
 
 	//health check
 	e.GET("/health", func(c echo.Context) error {
