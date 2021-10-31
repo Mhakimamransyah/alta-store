@@ -13,10 +13,3 @@ type ProductImages struct {
 	Updated_at  time.Time
 	Deleted_at  time.Time
 }
-
-func NewProductsImage(id_products int, image_path string) *ProductImages {
-	return &ProductImages{
-		Products_ID: id_products,
-		Created_at:  time.Now(),
-	}
-}

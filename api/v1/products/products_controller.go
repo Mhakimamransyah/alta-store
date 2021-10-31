@@ -63,61 +63,6 @@ func (controller *Controller) CreateProductsController(c echo.Context) error {
 	return c.JSON(common.NewSuccessResponseWithoutData())
 }
 
-// func mockService(c echo.Context) {
-// 	// Parse our multipart form, 10 << 20 specifies a maximum
-// 	// upload of 10 MB files.
-// 	// data, err := c.FormFile("foto")
-// 	// if err != nil {
-// 	// 	fmt.Println(err.Error())
-// 	// }
-// 	// fmt.Println("Ukuran file : ", float64(data.Size/1024/1024))
-// 	// fmt.Println("Type file : ", data.Header["Content-Type"][0])
-// 	// src, err := data.Open()
-// 	// if err != nil {
-// 	// 	fmt.Println(err)
-// 	// }
-// 	// defer src.Close()
-// 	// // Destination
-// 	// dst, err := os.Create(data.Filename)
-// 	// if err != nil {
-// 	// 	fmt.Println(err)
-// 	// }
-// 	// defer dst.Close()
-// 	// if _, err = io.Copy(dst, src); err != nil {
-// 	// 	fmt.Println(err)
-// 	// }
-// 	// fmt.Println("done")
-
-// 	form, err := c.MultipartForm()
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-// 	files := form.File["files"]
-
-// 	for _, file := range files {
-// 		// Source
-// 		src, err := file.Open()
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		defer src.Close()
-
-// 		// Destination
-// 		dst, err := os.Create(file.Filename)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 		}
-// 		defer dst.Close()
-
-// 		// Copy
-// 		if _, err = io.Copy(dst, src); err != nil {
-// 			fmt.Println(err)
-// 		}
-
-// 	}
-
-// }
-
 func (controller *Controller) ModifyProductsController(c echo.Context) error {
 	products_updatables := products.ProductsUpdatable{}
 	c.Bind(&products_updatables)
@@ -153,6 +98,22 @@ func (controller *Controller) DetailProductsController(c echo.Context) error {
 	return c.JSON(common.NewSuccessResponse(data))
 }
 
+func (controller *Controller) RemoveProductsController(c echo.Context) error {
+	id_products, err := strconv.Atoi(c.Param("id_products"))
+	if err != nil {
+		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
+	}
+	id_admin, err := strconv.Atoi(c.Param("id_admin"))
+	if err != nil {
+		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
+	}
+	err = controller.products_service.RemoveProducts(id_products, id_admin)
+	if err != nil {
+		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
+	}
+	return c.JSON(common.NewSuccessResponseWithoutData())
+}
+
 func (controller *Controller) FindAllProductsController(c echo.Context) error {
 	filter := request.NewFilterProducts(c)
 	data, err := controller.products_service.FindAllProducts(*filter)
@@ -172,7 +133,7 @@ func (controller *Controller) RemoveProductsPictureController(c echo.Context) er
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
 	id_admin := int(middleware.ExtractTokenKey(c, "id").(float64))
-	err = controller.products_service.RemoveProductsImages(id_products, id_products_images, id_admin)
+	err = controller.products_image_service.RemoveProductsImages(id_admin, id_products, id_products_images, id_admin)
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}

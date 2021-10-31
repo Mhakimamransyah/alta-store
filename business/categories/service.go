@@ -10,6 +10,16 @@ type service struct {
 	repository Repository
 }
 
+type FilterCategories struct {
+	Query    string
+	SortName string
+	SortDate string
+	AdminId  int
+	Status   string
+	Limit    int
+	Offset   int
+}
+
 type CategoriesSpec struct {
 	Name     string `form:"name" validate:"required,max=20"`
 	ParentID int    `form:"parent_id"`
@@ -27,18 +37,18 @@ func InitCategoriesService(repository Repository) *service {
 	}
 }
 
-func (service *service) FindAllCategories(limit, offset int) (*[]Categories, error) {
-	list, err := service.repository.GetCategories(limit, offset)
+func (service *service) FindAllCategories(categories_search *FilterCategories) (*[]Categories, error) {
+	list, err := service.repository.GetCategories(categories_search)
 	if err != nil {
-		return nil, err
+		return nil, business.ErrNotFound
 	}
 	return list, nil
 }
 
-func (service *service) FindAllSubCategories(id_categories, limit, offset int) (*[]Categories, error) {
-	list, err := service.repository.GetSubCategories(id_categories, limit, offset)
+func (service *service) FindAllSubCategories(id_categories int, categories_search *FilterCategories) (*[]Categories, error) {
+	list, err := service.repository.GetSubCategories(id_categories, categories_search)
 	if err != nil {
-		return nil, err
+		return nil, business.ErrNotFound
 	}
 	return list, nil
 }
@@ -52,10 +62,15 @@ func (service *service) InsertCategories(categories_spec CategoriesSpec, id_admi
 	if categories_spec.ParentID != 0 {
 		_, err := service.repository.GetCategoriesById(categories_spec.ParentID)
 		if err != nil {
-			return errors.New("Parent ID not found")
+			return business.ErrNotFound
 		}
 	}
-	categories_spec.AdminID = id_admin
+
+	if id_admin != createdBy {
+		return errors.New("Invalid actions")
+	}
+
+	categories_spec.AdminID = createdBy
 	categories := NewCategories(categories_spec)
 	err = service.repository.CreateCategories(categories, createdBy)
 	if err != nil {
@@ -67,7 +82,7 @@ func (service *service) InsertCategories(categories_spec CategoriesSpec, id_admi
 func (service *service) ModifyCategories(categories_updatable CategoriesUpdatable, id_categories int, id_admin int, modifiedBy int) error {
 	categories, err := service.repository.GetCategoriesById(id_categories)
 	if err != nil {
-		return err
+		return business.ErrNotFound
 	}
 
 	err = validator.GetValidator().Struct(categories_updatable)
@@ -76,7 +91,7 @@ func (service *service) ModifyCategories(categories_updatable CategoriesUpdatabl
 	}
 
 	// check if admin have authorization to modify category
-	if categories.AdminID != id_admin {
+	if categories.AdminID != modifiedBy {
 		return business.ErrUnauthorized
 	}
 
@@ -91,7 +106,7 @@ func (service *service) ModifyCategories(categories_updatable CategoriesUpdatabl
 func (service *service) RemoveCategories(id_categories int, id_admin int, deletedBy int) error {
 	categories, err := service.repository.GetCategoriesById(id_categories)
 	if err != nil {
-		return err
+		return business.ErrNotFound
 	}
 
 	// check if admin have authorization to modify category
@@ -101,7 +116,7 @@ func (service *service) RemoveCategories(id_categories int, id_admin int, delete
 
 	err = service.repository.DeleteCategories(id_categories, deletedBy)
 	if err != nil {
-		return err
+		return business.ErrInternalServerError
 	}
 	return nil
 }

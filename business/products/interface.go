@@ -5,7 +5,7 @@ type Service interface {
 	DetailProducts(id_products int) (*Products, error)
 	InsertProducts(id_admin int, products_spec ProductsSpec, createdById int) (*Products, error)
 	ModifyProducts(id_admin, id_products int, products_updatable ProductsUpdatable, modifiedById int) error
-	RemoveProductsImages(id_products, id_products_images int, deletedById int) error
+	RemoveProducts(id_products int, deletedById int) error
 }
 
 type Repository interface {
@@ -13,4 +13,6 @@ type Repository interface {
 	GetDetailProducts(id_products int) (*Products, error)
 	CreateProducts(products *Products, createdById int) (*Products, error)
 	UpdateProducts(id_products int, products *Products, modifiedById int) error
+	DeleteProducts(products *Products) error
+	UpdateStocks(id_products, value int, operation string) error
 }
