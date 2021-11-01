@@ -8,7 +8,9 @@ import (
 	"altaStore/api/v1/cart"
 	"altaStore/api/v1/categories"
 	"altaStore/api/v1/products"
+	"altaStore/api/v1/transaction"
 	"altaStore/api/v1/user"
+	"net/http"
 
 	echo "github.com/labstack/echo/v4"
 )
@@ -22,7 +24,8 @@ func RegisterPath(
 	cartController *cart.Controller,
 	adminController *admins.Controller,
 	categoriesController *categories.Controller,
-	productsController *products.Controller) {
+	productsController *products.Controller,
+	transactionController *transaction.Controller) {
 	// if authController == nil || userController == nil || addressController == nil || cartController == nil {
 	// 	panic("Controller parameter cannot be nil")
 	// }
@@ -78,6 +81,17 @@ func RegisterPath(
 	products.POST("/:id_products/products_images", productsController.InsertNewProductsPictureController)
 	products.DELETE("/:id_products/products_images/:id_products_images", productsController.RemoveProductsPictureController)
 	products.GET("/search", productsController.FindAllProductsController)
+
+	// Products Images
+	fs := http.FileServer(http.Dir("products_image/"))
+	e.GET("/products_img/*", echo.WrapHandler(http.StripPrefix("/products_img/", fs)))
+
+	// Transaction
+	transaction := e.Group("/v1/transaction")
+	transaction.Use(middleware.JWTMiddleware())
+	transaction.POST("", transactionController.Checkout)
+	transaction.GET("", transactionController.GetAllTransaction)
+	transaction.GET("/invoice", transactionController.GetTransactionByInvoice)
 
 	//health check
 	e.GET("/health", func(c echo.Context) error {

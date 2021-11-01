@@ -1,0 +1,15 @@
+mode: set
+altaStore/business/user/user.go:22.28,33.2 1 1
+altaStore/business/user/service.go:24.59,29.2 1 1
+altaStore/business/user/service.go:32.55,34.2 1 1
+altaStore/business/user/service.go:37.64,39.2 1 1
+altaStore/business/user/service.go:42.73,45.16 2 1
+altaStore/business/user/service.go:49.2,49.18 1 1
+altaStore/business/user/service.go:45.16,47.3 1 1
+altaStore/business/user/service.go:53.67,55.16 2 1
+altaStore/business/user/service.go:58.2,59.25 2 1
+altaStore/business/user/service.go:62.2,71.16 3 1
+altaStore/business/user/service.go:75.2,75.12 1 1
+altaStore/business/user/service.go:55.16,57.3 1 1
+altaStore/business/user/service.go:59.25,61.3 1 1
+altaStore/business/user/service.go:71.16,73.3 1 1

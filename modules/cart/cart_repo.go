@@ -18,7 +18,7 @@ type Cart struct {
 	AddressID *uint  `json:"address_id"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt *time.Time `soft_delete.DeletedAt`
+	DeletedAt *time.Time
 }
 
 type CartDetail struct {
@@ -63,12 +63,6 @@ func newCartDetailTable(cartDetail cart.CartDetail) *CartDetail {
 
 //NewGormDBRepository Generate Gorm DB user repository
 func NewGormDBRepository(db *gorm.DB) *GormRepository {
-	return &GormRepository{
-		db,
-	}
-}
-
-func NewGormDBRepositoryWithDeleted(db *gorm.DB) *GormRepository {
 	return &GormRepository{
 		db,
 	}
@@ -187,4 +181,54 @@ func (repo *GormRepository) UpdateQuantity(cartID, productID, qty uint) error {
 	}
 
 	return nil
+}
+
+func (repo *GormRepository) UpdateStatusCart(cartID uint, status string) error {
+	err := repo.DB.Model(&Cart{}).Where("id = ?", cartID).Update("status", status).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *GormRepository) UpdateAddressID(cartID uint, addressID uint) error {
+	err := repo.DB.Model(&Cart{}).Where("id = ?", cartID).Update("address_id", addressID).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *GormRepository) FindCartByID(cartID uint) (*cart.Cart, error) {
+
+	var cartData Cart
+
+	err := repo.DB.Where("id = ?", cartID).First(&cartData).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	cart := cartData.CartToService()
+
+	return &cart, nil
+
+}
+
+func (repo *GormRepository) GetAllCartIDTransaction(userID uint) ([]cart.Cart, error) {
+	var carts []Cart
+
+	err := repo.DB.Where("user_id = ?", userID).Where("status <> ?", "active").Find(&carts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var result []cart.Cart
+	for _, value := range carts {
+		result = append(result, value.CartToService())
+	}
+
+	return result, nil
 }

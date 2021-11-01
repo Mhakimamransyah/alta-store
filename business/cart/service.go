@@ -2,6 +2,7 @@ package cart
 
 import (
 	"altaStore/business"
+	"altaStore/business/products"
 	"altaStore/util/validator"
 	"time"
 )
@@ -17,13 +18,17 @@ type AddToCartSpec struct {
 
 //=============== The implementation of those interface put below =======================
 type service struct {
-	repository Repository
+	repository        Repository
+	productRepository products.Repository
 }
 
 //NewService Construct user service object
-func NewService(repository Repository) Service {
+func NewService(
+	repository Repository,
+	productRepo products.Repository) Service {
 	return &service{
 		repository,
+		productRepo,
 	}
 }
 
@@ -49,23 +54,66 @@ func (s *service) AddToCart(addToCartSpec AddToCartSpec) error {
 		getActiveCart, _ = s.repository.GetActiveCart(addToCartSpec.UserID)
 	}
 
+	var product *products.Products
+	product, err = s.productRepository.GetDetailProducts(int(addToCartSpec.ProductID))
+
+	if err != nil {
+		return business.ErrProductNotFound
+	}
+
+	if addToCartSpec.Do == "addition" {
+		if product.Stock < int(addToCartSpec.Quantity) {
+			return business.ErrProductOOS
+		}
+	}
+
 	productOnCart, err := s.repository.FindProductOnCartDetail(getActiveCart.ID, addToCartSpec.ProductID)
+
 	if err == nil {
+		//udah
+		operation := "add"
+		stock := productOnCart.Quantity
 		if addToCartSpec.Quantity == 0 || (addToCartSpec.Do == "subtraction" && addToCartSpec.Quantity > productOnCart.Quantity) { //delete from cart detail
+			//udah
 			err = s.repository.UpdateQuantity(getActiveCart.ID, addToCartSpec.ProductID, 0)
+			if err != nil {
+				return err
+			}
+
+			err = s.productRepository.UpdateStocks(int(productOnCart.ProductID), int(stock), operation)
+			if err != nil {
+				return err
+			}
 		} else {
 			if addToCartSpec.Do == "addition" {
+				//udah
+				operation = "min"
+				stock = addToCartSpec.Quantity
+				err = s.productRepository.UpdateStocks(int(productOnCart.ProductID), int(stock), operation)
+				if err != nil {
+					return err
+				}
 				err = s.repository.UpdateQuantity(getActiveCart.ID, addToCartSpec.ProductID, productOnCart.Quantity+addToCartSpec.Quantity)
+				if err != nil {
+					return err
+				}
 			} else {
+				//udah
 				err = s.repository.UpdateQuantity(getActiveCart.ID, addToCartSpec.ProductID, productOnCart.Quantity-addToCartSpec.Quantity)
-			}
-		}
+				if err != nil {
+					return err
+				}
 
-		if err != nil {
-			return err
+				stock = addToCartSpec.Quantity
+				err = s.productRepository.UpdateStocks(int(productOnCart.ProductID), int(stock), operation)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	} else {
 		if addToCartSpec.Do == "addition" {
+			//udah
 			cartDetail := NewCartDetail(
 				getActiveCart.ID,
 				addToCartSpec.ProductID,
@@ -75,6 +123,12 @@ func (s *service) AddToCart(addToCartSpec AddToCartSpec) error {
 			)
 
 			err = s.repository.InsertCartDetail(cartDetail)
+			if err != nil {
+				return err
+			}
+
+			stock := addToCartSpec.Quantity
+			err = s.productRepository.UpdateStocks(int(productOnCart.ProductID), int(stock), "min")
 			if err != nil {
 				return err
 			}
@@ -101,9 +155,13 @@ func (s *service) GetActiveCart(userID uint) (ActiveCart, error) {
 	}
 
 	var cartDetailsResult []ActiveCartDetail
+	var productFromRepo *products.Products
+	var simpleProduct ProductCart
 
 	for _, value := range cartDetails {
-		cartDetailsResult = append(cartDetailsResult, ToActiveCartDetail(value))
+		productFromRepo, _ = s.productRepository.GetDetailProducts(int(value.ProductID))
+		simpleProduct = ToProductCart(*productFromRepo)
+		cartDetailsResult = append(cartDetailsResult, ToActiveCartDetail(value, simpleProduct))
 	}
 
 	result = MergeCart(getActiveCart.ID, getActiveCart.Status, getActiveCart.AddressID, cartDetailsResult)

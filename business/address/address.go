@@ -21,6 +21,17 @@ type Address struct {
 	DeletedAt   *time.Time
 }
 
+type TransactionAddress struct {
+	Name        string
+	PhoneNumber string
+	Street      string
+	City        string
+	Province    string
+	District    string
+	PostalCode  uint
+	AddressType *string
+}
+
 //NewAddress
 func NewAddress(
 	userID uint,
