@@ -97,7 +97,7 @@ func (repository *GormRepository) GetAdminById(id int) (*admins.Admins, error) {
 
 func (repository *GormRepository) LoginAdmin(username, password string) (*admins.Admins, error) {
 	admin := AdminsTable{}
-	err := repository.DB.Where("username = ? ", username).First(&admin).Error
+	err := repository.DB.Where("username = ? AND status = ?", username, "active").First(&admin).Error
 	if err != nil {
 		return nil, err
 	}
