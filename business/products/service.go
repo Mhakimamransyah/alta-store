@@ -33,8 +33,8 @@ type ProductsSpec struct {
 }
 
 type ProductsUpdatable struct {
-	Title        string  `form:"title" validate:"required,max=100"`
-	Price        int     `form:"price" validate:"required"`
+	Title        string  `form:"title" validate:"max=100"`
+	Price        int     `form:"price"`
 	Description  string  `form:"description" validate:"max=200"`
 	Stock        int     `form:"stock"`
 	Status       string  `form:"status"`
