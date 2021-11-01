@@ -15,6 +15,7 @@ import (
 	cartController "altaStore/api/v1/cart"
 	CategoriesController "altaStore/api/v1/categories"
 	ProductsController "altaStore/api/v1/products"
+	transactionController "altaStore/api/v1/transaction"
 	userController "altaStore/api/v1/user"
 	addressService "altaStore/business/address"
 	AdminsService "altaStore/business/admins"
@@ -23,6 +24,7 @@ import (
 	CategoriesService "altaStore/business/categories"
 	ProductsService "altaStore/business/products"
 	productsimages "altaStore/business/products_images"
+	transactionService "altaStore/business/transaction"
 	userService "altaStore/business/user"
 	addressRepository "altaStore/modules/address"
 	AdminsRepository "altaStore/modules/admins"
@@ -31,7 +33,9 @@ import (
 	migration "altaStore/modules/migration"
 	ProductsRepository "altaStore/modules/products"
 	ProductsImages "altaStore/modules/products_images"
+	transactionRepository "altaStore/modules/transaction"
 	userRepository "altaStore/modules/user"
+	utilService "altaStore/util/password"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
@@ -73,20 +77,17 @@ func main() {
 	//initialize database connection based on given config
 	dbConnection := newDatabaseConnection(config)
 
+	utilService := utilService.NewUtil()
 	userRepo := userRepository.NewGormDBRepository(dbConnection)
-	userService := userService.NewService(userRepo)
+	userService := userService.NewService(userRepo, utilService)
 	userController := userController.NewController(userService)
 
-	authService := authService.NewService(userService)
+	authService := authService.NewService(userService, utilService)
 	authController := authController.NewController(authService)
 
 	addressRepo := addressRepository.NewGormDBRepository(dbConnection)
 	addressService := addressService.NewService(addressRepo)
 	addressController := addressController.NewController(addressService)
-
-	cartRepo := cartRepository.NewGormDBRepository(dbConnection)
-	cartService := cartService.NewService(cartRepo)
-	cartController := cartController.NewController(cartService)
 
 	adminRepository := AdminsRepository.InitAdminRepository(dbConnection)
 	adminService := AdminsService.InitAdminService(adminRepository)
@@ -103,6 +104,14 @@ func main() {
 	productsService := ProductsService.InitProductsService(productsRepository, productsImagesRepository)
 	productsController := ProductsController.InitProductsController(productsService, productsImagesService)
 
+	cartRepo := cartRepository.NewGormDBRepository(dbConnection)
+	cartService := cartService.NewService(cartRepo, productsRepository)
+	cartController := cartController.NewController(cartService)
+
+	transactionRepo := transactionRepository.NewGormDBRepository(dbConnection)
+	transactionService := transactionService.NewService(transactionRepo, cartRepo, addressRepo, productsRepository)
+	transactionController := transactionController.NewController(transactionService)
+
 	//create echo http
 	e := echo.New()
 
@@ -116,6 +125,7 @@ func main() {
 		adminController,
 		categoriesController,
 		productsController,
+		transactionController,
 	)
 
 	// run server

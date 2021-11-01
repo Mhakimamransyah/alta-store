@@ -16,10 +16,11 @@ func InitProductsImagesService(repository Repository) *service {
 }
 
 func (service *service) InsertNewImages(products_image *ProductImages, files []*multipart.FileHeader, createdBy int) error {
+
 	for _, img := range files {
 		err := service.repository.CreateImages(products_image, img, createdBy)
 		if err != nil {
-			continue
+			return business.ErrAddProductsImages
 		}
 	}
 

@@ -1,6 +1,7 @@
 package cart
 
 import (
+	"altaStore/business/products"
 	"time"
 )
 
@@ -33,10 +34,15 @@ type ActiveCart struct {
 }
 
 type ActiveCartDetail struct {
-	ID        uint
-	ProductID uint
-	Price     uint
-	Quantity  uint
+	ID       uint
+	Product  ProductCart
+	Price    uint
+	Quantity uint
+}
+
+type ProductCart struct {
+	Title       string
+	Description string
 }
 
 //NewCart create new Cart
@@ -89,11 +95,18 @@ func MergeCart(
 }
 
 //ToActiveCartDetail bind CartDetail struct to ActiveCartDetail struct
-func ToActiveCartDetail(cartDetail CartDetail) ActiveCartDetail {
+func ToActiveCartDetail(cartDetail CartDetail, product ProductCart) ActiveCartDetail {
 	return ActiveCartDetail{
-		ID:        cartDetail.ID,
-		ProductID: cartDetail.ProductID,
-		Price:     cartDetail.Price,
-		Quantity:  cartDetail.Quantity,
+		ID:       cartDetail.ID,
+		Product:  product,
+		Price:    cartDetail.Price,
+		Quantity: cartDetail.Quantity,
+	}
+}
+
+func ToProductCart(product products.Products) ProductCart {
+	return ProductCart{
+		Title:       product.Title,
+		Description: product.Description,
 	}
 }

@@ -70,21 +70,3 @@ func (controller *Controller) InsertUser(c echo.Context) error {
 
 	return c.JSON(common.NewSuccessResponseWithoutData())
 }
-
-// // UpdateUser update existing user handler
-// func (controller *Controller) UpdateUser(c echo.Context) error {
-// 	id, _ := strconv.Atoi(c.Param("id"))
-
-// 	updateUserRequest := new(request.UpdateUserRequest)
-
-// 	if err := c.Bind(updateUserRequest); err != nil {
-// 		return c.JSON(common.NewBadRequestResponse())
-// 	}
-
-// 	err := controller.service.UpdateUser(id, updateUserRequest.Name, "modifier", updateUserRequest.Version)
-// 	if err != nil {
-// 		return c.JSON(common.NewErrorBusinessResponse(err))
-// 	}
-
-// 	return c.JSON(common.NewSuccessResponseWithoutData())
-// }

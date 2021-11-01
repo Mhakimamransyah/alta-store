@@ -31,33 +31,3 @@ func NewUser(
 		DeletedAt:   nil,
 	}
 }
-
-//ModifyUser update existing User data
-func (oldData *User) ModifyUser(newName string, newPhoneNumber string, newPassword string, modifiedAt time.Time) User {
-	name := oldData.Name
-	phoneNumber := oldData.PhoneNumber
-	password := oldData.Password
-
-	if newName != "" {
-		name = newName
-	}
-
-	if newPhoneNumber != "" {
-		phoneNumber = newPhoneNumber
-	}
-
-	if newPassword != "" {
-		password = newPassword
-	}
-
-	return User{
-		ID:          oldData.ID,
-		Name:        name,
-		Email:       oldData.Email,
-		PhoneNumber: phoneNumber,
-		Password:    password,
-		CreatedAt:   oldData.CreatedAt,
-		UpdatedAt:   modifiedAt,
-		DeletedAt:   oldData.DeletedAt,
-	}
-}

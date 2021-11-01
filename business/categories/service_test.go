@@ -128,7 +128,7 @@ func TestModifyCategories(t *testing.T) {
 	t.Run("Expects failed modify categories, invalid spec", func(t *testing.T) {
 		categoriesRepository.On("GetCategoriesById", Id).Return(&categoriesData, nil).Once()
 		err := categoiresService.ModifyCategories(categories.CategoriesUpdatable{
-			Status: "non active",
+			Name: "123456789012345678901234567890",
 		}, Id, AdminId, AdminId)
 		assert.NotNil(t, err)
 	})

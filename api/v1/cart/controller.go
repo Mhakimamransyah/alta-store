@@ -73,5 +73,9 @@ func (controller *Controller) GetActiveCart(c echo.Context) error {
 		return c.JSON(common.NewErrorBusinessResponse(err))
 	}
 
+	if activeCart.CartID == 0 {
+		return c.JSON(common.NewSuccessResponse(nil))
+	}
+
 	return c.JSON(common.NewSuccessResponse(activeCart))
 }

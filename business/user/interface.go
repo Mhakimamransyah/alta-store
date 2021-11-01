@@ -13,9 +13,6 @@ type Service interface {
 
 	//InsertUser Insert new User into storage
 	InsertUser(insertUserSpec InsertUserSpec) error
-
-	//UpdateUser if data not found will return error
-	// UpdateUser(id int, name string, modifiedBy string, currentVersion int) error
 }
 
 //Repository ingoing port for user
@@ -31,7 +28,10 @@ type Repository interface {
 
 	//InsertUser Insert new User into storage
 	InsertUser(user User) error
+}
 
-	//UpdateUser if data not found will return error
-	// UpdateUser(user User, currentVersion int) error
+type Util interface {
+	EncryptPassword(string) ([]byte, error)
+
+	ComparePassword(string, string) bool
 }

@@ -26,6 +26,15 @@ func NewSuccessResponse(data interface{}) (int, SuccessResponse) {
 }
 
 //NewSuccessResponse create new success payload
+func NewSuccessCreated() (int, SuccessResponse) {
+	return http.StatusCreated, SuccessResponse{
+		Success,
+		"Success",
+		map[string]interface{}{},
+	}
+}
+
+//NewSuccessResponse create new success payload
 func NewSuccessResponseWithoutData() (int, SuccessResponse) {
 	return http.StatusOK, SuccessResponse{
 		Success,

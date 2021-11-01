@@ -14,8 +14,8 @@ type InsertAddressSpec struct {
 	Street      string `validate:"required"`
 	City        string `validate:"required"`
 	Province    string `validate:"required"`
-	District    string `validate:"required`
-	PostalCode  uint   `validate:"required`
+	District    string `validate:"required"`
+	PostalCode  uint   `validate:"required"`
 	AddressType *string
 	IsDefault   bool
 }
@@ -41,11 +41,12 @@ func (s *service) InsertAddress(insertAddressSpec InsertAddressSpec) error {
 
 	defaultAddress, err := s.repository.GetDefaultAddress(insertAddressSpec.UserID)
 	if err != nil {
-		if insertAddressSpec.IsDefault != true {
+		if !insertAddressSpec.IsDefault {
 			insertAddressSpec.IsDefault = true
 		}
 	} else {
-		if insertAddressSpec.IsDefault == true {
+
+		if insertAddressSpec.IsDefault {
 			err := s.repository.UpdateDefaultAddress(*defaultAddress)
 			if err != nil {
 				return business.ErrInternalServerError
@@ -72,7 +73,7 @@ func (s *service) InsertAddress(insertAddressSpec InsertAddressSpec) error {
 
 	err = s.repository.InsertAddress(address)
 	if err != nil {
-		return err
+		return business.ErrInternalServerError
 	}
 
 	return nil
