@@ -17,8 +17,8 @@ type AdminSpec struct {
 }
 
 type AdminUpdatable struct {
-	Name         string `json:"name" form:"name" validate:"required,max=20"`
-	Phone_number string `json:"phone_number" form:"phone_number" validate:"required,max=20"`
+	Name         string `json:"name" form:"name" validate:"max=20"`
+	Phone_number string `json:"phone_number" form:"phone_number" validate:"max=20"`
 	Status       string `json:"status" form:"status" validate:"max=10"`
 }
 
