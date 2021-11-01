@@ -6,6 +6,7 @@ import (
 	"altaStore/business/cart"
 	"altaStore/business/products"
 	"altaStore/util/validator"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -183,7 +184,9 @@ func (s *service) GetAllTransaction(userID uint) ([]*CheckoutResponse, error) {
 	}
 
 	listTransaction, _ := s.repository.FindAllTransaction(cartID)
-
+	fmt.Println("XXXXXXXXXXXXXXXXXXXXXXXXXX")
+	fmt.Println(len(listTransaction))
+	fmt.Println("XXXXXXXXXXXXXXXXXXXXXXXXXX")
 	for _, value := range listTransaction {
 		trx, _ := s.FindTransactionByInvoice(value.InvoiceNumber, userID)
 		transactions = append(transactions, trx)

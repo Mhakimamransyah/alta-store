@@ -2,7 +2,6 @@ package user
 
 import (
 	"altaStore/business/user"
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -72,9 +71,6 @@ func (repo *GormRepository) FindUserByID(id int) (*user.User, error) {
 
 	var userData User
 	err := repo.DB.Where("id = ?", id).First(&userData).Error
-	fmt.Println("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
-	fmt.Println(err)
-	fmt.Println("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ")
 	if err != nil {
 		return nil, err
 	}
