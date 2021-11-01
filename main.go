@@ -35,6 +35,7 @@ import (
 	ProductsImages "altaStore/modules/products_images"
 	transactionRepository "altaStore/modules/transaction"
 	userRepository "altaStore/modules/user"
+	utilService "altaStore/util/password"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
@@ -76,11 +77,12 @@ func main() {
 	//initialize database connection based on given config
 	dbConnection := newDatabaseConnection(config)
 
+	utilService := utilService.NewUtil()
 	userRepo := userRepository.NewGormDBRepository(dbConnection)
-	userService := userService.NewService(userRepo)
+	userService := userService.NewService(userRepo, utilService)
 	userController := userController.NewController(userService)
 
-	authService := authService.NewService(userService)
+	authService := authService.NewService(userService, utilService)
 	authController := authController.NewController(authService)
 
 	addressRepo := addressRepository.NewGormDBRepository(dbConnection)

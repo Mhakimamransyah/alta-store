@@ -2,8 +2,8 @@ package user
 
 import (
 	"altaStore/business"
-	util "altaStore/util/password"
 	"altaStore/util/validator"
+	"fmt"
 	"time"
 )
 
@@ -17,19 +17,28 @@ type InsertUserSpec struct {
 
 //=============== The implementation of those interface put below =======================
 type service struct {
-	repository Repository
+	repository  Repository
+	utilService Util
 }
 
 //NewService Construct user service object
-func NewService(repository Repository) Service {
+func NewService(repository Repository, util Util) Service {
 	return &service{
 		repository,
+		util,
 	}
 }
 
 //FindUserByID Get user by given ID, return nil if not exist
 func (s *service) FindUserByID(id int) (*User, error) {
-	return s.repository.FindUserByID(id)
+	x, err := s.repository.FindUserByID(id)
+	fmt.Println("TTTTTTTTTTTTTTTTTTTTTTTTTT")
+	fmt.Println(err)
+	fmt.Println("__________________________")
+	fmt.Println(x)
+	fmt.Println("TTTTTTTTTTTTTTTTTTTTTTTTTT")
+	// return s.repository.FindUserByID(id)
+	return x, err
 }
 
 //FindUserByEmailAndPassword Get user by given ID, return nil if not exist
@@ -41,6 +50,11 @@ func (s *service) FindUserByEmail(email string) (*User, error) {
 func (s *service) FindAllUser(skip int, rowPerPage int) ([]User, error) {
 
 	user, err := s.repository.FindAllUser(skip, rowPerPage)
+	fmt.Println("TTTTTTTTTTTTTTTTTTTTTTTTTT")
+	fmt.Println(err)
+	fmt.Println("__________________________")
+	fmt.Println(user)
+	fmt.Println("TTTTTTTTTTTTTTTTTTTTTTTTTT")
 	if err != nil {
 		return []User{}, err
 	}
@@ -54,7 +68,7 @@ func (s *service) InsertUser(insertUserSpec InsertUserSpec) error {
 	if err != nil {
 		return business.ErrInvalidSpec
 	}
-	hashPassword, errorEncrypt := util.EncryptPassword(insertUserSpec.Password)
+	hashPassword, errorEncrypt := s.utilService.EncryptPassword(insertUserSpec.Password)
 	if errorEncrypt != nil {
 		return errorEncrypt
 	}
@@ -73,20 +87,3 @@ func (s *service) InsertUser(insertUserSpec InsertUserSpec) error {
 
 	return nil
 }
-
-//UpdateUser will update found user, if not exists will be return error
-// func (s *service) UpdateUser(id int, name string, modifiedBy string, currentVersion int) error {
-
-// 	user, err := s.repository.FindUserByID(id)
-// 	if err != nil {
-// 		return err
-// 	} else if user == nil {
-// 		return business.ErrNotFound
-// 	} else if user.Version != currentVersion {
-// 		return business.ErrHasBeenModified
-// 	}
-
-// 	modifiedUser := user.ModifyUser(name, time.Now(), modifiedBy)
-
-// 	return s.repository.UpdateUser(modifiedUser, currentVersion)
-// }

@@ -70,9 +70,11 @@ func (s *service) AddToCart(addToCartSpec AddToCartSpec) error {
 	productOnCart, err := s.repository.FindProductOnCartDetail(getActiveCart.ID, addToCartSpec.ProductID)
 
 	if err == nil {
+		//udah
 		operation := "add"
 		stock := productOnCart.Quantity
 		if addToCartSpec.Quantity == 0 || (addToCartSpec.Do == "subtraction" && addToCartSpec.Quantity > productOnCart.Quantity) { //delete from cart detail
+			//udah
 			err = s.repository.UpdateQuantity(getActiveCart.ID, addToCartSpec.ProductID, 0)
 			if err != nil {
 				return err
@@ -84,6 +86,7 @@ func (s *service) AddToCart(addToCartSpec AddToCartSpec) error {
 			}
 		} else {
 			if addToCartSpec.Do == "addition" {
+				//udah
 				operation = "min"
 				stock = addToCartSpec.Quantity
 				err = s.productRepository.UpdateStocks(int(productOnCart.ProductID), int(stock), operation)
@@ -94,8 +97,8 @@ func (s *service) AddToCart(addToCartSpec AddToCartSpec) error {
 				if err != nil {
 					return err
 				}
-
 			} else {
+				//udah
 				err = s.repository.UpdateQuantity(getActiveCart.ID, addToCartSpec.ProductID, productOnCart.Quantity-addToCartSpec.Quantity)
 				if err != nil {
 					return err
@@ -110,6 +113,7 @@ func (s *service) AddToCart(addToCartSpec AddToCartSpec) error {
 		}
 	} else {
 		if addToCartSpec.Do == "addition" {
+			//udah
 			cartDetail := NewCartDetail(
 				getActiveCart.ID,
 				addToCartSpec.ProductID,
@@ -119,6 +123,12 @@ func (s *service) AddToCart(addToCartSpec AddToCartSpec) error {
 			)
 
 			err = s.repository.InsertCartDetail(cartDetail)
+			if err != nil {
+				return err
+			}
+
+			stock := addToCartSpec.Quantity
+			err = s.productRepository.UpdateStocks(int(productOnCart.ProductID), int(stock), "min")
 			if err != nil {
 				return err
 			}

@@ -3,7 +3,6 @@ package auth
 import (
 	business "altaStore/business"
 	"altaStore/business/user"
-	util "altaStore/util/password"
 	"os"
 	"time"
 
@@ -13,12 +12,14 @@ import (
 //=============== The implementation of those interface put below =======================
 type service struct {
 	userService user.Service
+	utilService UtilPassword
 }
 
 //NewService Construct user service object
-func NewService(userService user.Service) Service {
+func NewService(userService user.Service, utilService UtilPassword) Service {
 	return &service{
 		userService,
+		utilService,
 	}
 }
 
@@ -29,7 +30,7 @@ func (s *service) Login(email string, password string) (string, error) {
 		return "", business.ErrLogin
 	}
 
-	comparePassword := util.ComparePassword(user.Password, password)
+	comparePassword := s.utilService.ComparePassword(user.Password, password)
 
 	if !comparePassword {
 		return "", business.ErrLogin
