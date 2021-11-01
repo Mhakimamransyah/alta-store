@@ -60,7 +60,7 @@ func (service *Controller) InsertCategoriesController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
-	return c.JSON(common.NewSuccessResponseWithoutData())
+	return c.JSON(common.NewSuccessCreated())
 }
 
 func (service *Controller) ModifyCategoriesController(c echo.Context) error {

@@ -2,42 +2,1001 @@ openapi: '3.0.2'
 info:
   description: 
     'This is a Final Project for Advancing Career Program Alterra Academy.'
-  version: "1.0.0"
-  title: Alta Store API Documantation
+  version: '1'
+  title: Alta Store API Documentation
   contact:
     email: dev@alta.store.com
 servers:
   - url: http://ec2-54-255-28-193.ap-southeast-1.compute.amazonaws.com:8080/v1
-  - url: http://ec2-54-255-28-193.ap-southeast-1.compute.amazonaws.com:8080/
+  - url: http://ec2-54-255-28-193.ap-southeast-1.compute.amazonaws.com:8080
 tags:
   - name : Admins
-    description: ""
-  - name : Products
-    description: ""
+    description: "Operation that Belongs to Admin"
   - name : Categories
-    description : ""
-paths:
-   
+    description : "Operation that Belongs to Categories"
+  - name : Products
+    description: "Operations that Belongs to Products"
 
-   /admins:
+    
+paths:
+   /admins/login:
       post:
         tags:
           - "Admins"
-        summary: Create new admins
+        summary: Login admin
+        description: Admin login to web
+        security:
+          - bearerAuth: [] 
+        responses:
+          '200':
+             description: Admin success login
+             content:
+               application/json:
+                  schema:
+                    $ref : '#/components/schemas/Response'
+                  example:
+                    code : success
+                    message : success
+                    data : {
+                              "ID": 2,
+                              "Name": "Admin",
+                              "Status": "active",
+                              "Email": "admin1@gmail.com",
+                              "Phone_number": "08128909012",
+                              "Username": "admin1",
+                              "CreatedBy": "M.Hakim Amransyah",
+                              "Token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MzU3MzcwMTMsImlkIjoyLCJuYW1lIjoiQWRtaW4xIn0.AMm1sKhXFsMUcOE2nAfaXAYqKtPtMa9CeRYRQiTkmdY",
+                              "Created_at": "2021-10-31T13:57:22Z",
+                              "Updated_at": "0001-01-01T00:00:00Z",
+                              "Deleted_at": "0001-01-01T00:00:00Z"
+                          }
+          '400':
+             description: Username or password wrong
+             content:
+               application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : bad request
+                   message : Username or password is incorrect
+                   data : nil
+
+        requestBody:
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                required:
+                  - "username"
+                  - "password"
+                properties:
+                  username:
+                   type: string
+                  password:
+                    type: string
+   /admins:
+      post:
+        tags:
+        - "Admins"
+        summary: Admins create new admin
+        security:
+          - bearerAuth: []
+        responses:
+          '201':
+            description : Admins created
+            content : 
+               application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Success
+                   message : Success
+                   data : nil
+          '400':
+            description : Faile create new admin
+            content : 
+                application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : bad request
+                   message : Duplicate entry
+                   data : nil
+            
+        requestBody:
+          content:
+             multipart/form-data:
+              schema:
+                type: object
+                required:
+                  - "name"
+                  - "email"
+                  - "username"
+                  - "password"
+                  - "phone_number"
+                properties:
+                  name:
+                   type: string
+                  email:
+                   type : string
+                  username:
+                   type : string
+                  password:
+                   type : string
+                  phone_number:
+                   type : string
       get:
         tags:
-          - "Admins"
-        summary: Get all data admins
+         - "Admins"
+        summary: Get all admin data
+        security:
+          - bearerAuth: []
+        responses:
+          '200':
+            description : Success get all admin data
+            content:
+              application/json:
+                schema:
+                   $ref : '#/components/schemas/Response'
+                example:
+                   code : Success
+                   message : Success
+                   data : [
+                            {
+                                "Name": "M.Hakim",
+                                "ID": 1,
+                                "Email": "mhakim@gmail.com",
+                                "Phone_number": "081289091212",
+                                "Username": "mhakim"
+                            },
+                            {
+                                "Name": "Admin1",
+                                "ID": 2,
+                                "Email": "admin1@gmail.com",
+                                "Phone_number": "08128909012",
+                                "Username": "admin1"
+                            },
+                            {
+                                "Name": "Admin2",
+                                "ID": 4,
+                                "Email": "admin2@gmail.com",
+                                "Phone_number": "08128909012",
+                                "Username": "admin2"
+                            }
+                        ]
+          '400':
+            description: Failed get admin data      
+            content:
+               application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : bad request
+                   message : Not found
+                   data : nil
+   /admins/{username}:
+     get:
+      tags:
+       - "Admins"
+      summary: Get admin by username
+      security:
+          - bearerAuth: []
+      responses:
+        '200':
+          description : Success get data admin by username
+          content : 
+            application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Success
+                   message : Success
+                   data : {
+                            "Name": "M.Hakim",
+                            "ID": 1,
+                            "Email": "mhakim@gmail.com",
+                            "Phone_number": "081289091212",
+                            "Username": "mhakim"
+                        }
+        '400':
+          description : Admin not found
+          content : 
+            application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : bad request
+                   message : Not Found
+                   data : nil
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+     put:
+       tags:
+         - Admins
+       summary: Update data admin
+       security:
+          - bearerAuth: []
+       responses:
+         '200':
+           description : Success update data admin
+           content : 
+              application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Success
+                   message : Success
+                   data : 
+         '400':
+           description: Failed update data admin
+           content:
+               application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : bad request
+                   message : Given spec is not valid
+                   data : nil
+       parameters:
+         - in: path
+           name: username
+           schema:
+             type : string
+           required : true
+       requestBody:
+         content:
+           multipart/form-data:
+             schema:
+                type : object
+                required:
+                  - "name"
+                  - "phone_number"
+                properties:
+                   name: 
+                    type: string
+                   status:
+                    type: string
+                    enum: 
+                     - "active"
+                     - "non-active"
+                    description: Admin status (active, non active)
+                   phone_number:
+                    type : string
+   /admins/{id_admin}/categories:
+     post:
+       tags:
+        - "Admins"
+       summary: Admin create new categories
+       security:
+          - bearerAuth: []
+       responses:
+         '200':
+           description : Success create new categories
+           content:
+            application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Success
+                   message : Success
+                   data : nil
+         '400':
+           description : Failed create new categories
+           content:
+             application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : bad request
+                   message : Given spec is not valid
+                   data : nil
+       parameters:
+         - in: path
+           name: id_admin
+           schema:
+             type : integer
+           required: true
+       requestBody:
+         content:
+           multipart/form-data:
+             schema:
+               type : object
+               required:
+                 - "name"
+               properties:
+                 name:
+                   type : string
+                   description: Categories name
+                 parent_id:
+                   type : integer
+                   description: Categories Parent Id
+   /admins/{id_admin}/categories/{id_categories}:
+      delete:
+       tags:
+        - Admins
+       summary: Admin delete categories
+       security:
+          - bearerAuth: []
+       responses:
+         '200':
+          description : Succes delete categories
+          content:
+            application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Success
+                   message : Success
+                   data : nil
+         '400':
+          description: Failed delete categories
+          content:
+             application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : bad request
+                   message : Unauthorized action
+                   data : nil
+       parameters:
+         - in : path
+           name: id_admin
+           schema:
+             type : integer
+           required : true
+         - in : path
+           name: id_categories
+           schema:
+             type : integer
+           required: true
       put:
         tags:
-          - "Admins"
-        summary: Update data admins
+         - Admins
+        summary: Admins update data categories
+        security:
+          - bearerAuth: []
+        responses:
+          '200':
+            description : Success update data category
+            content:
+               application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Succes
+                   message : Success
+                   data : nil
+          '400' : 
+            description : Failed update data category
+            content:
+              application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : bad request
+                   message : Unauthorized action
+                   data : nil
+        requestBody:
+          content:
+            multipart/form-data:
+              schema:
+                type : object
+                required:
+                  - "name"
+                properties:
+                  name: 
+                    type: string
+                  status:
+                    type : string
+                    enum:
+                     - "active"
+                     - "non-active"
+                    description: Categories status (active, non-active)
+        parameters:
+         - in : path
+           name: id_admin
+           schema:
+             type : integer
+           required : true
+         - in : path
+           name: id_categories
+           schema:
+             type : integer
+           required: true
+   /admins/{id_admin}/products:
+     post:
+      tags:
+       - Admins
+      summary: Admin create new products
+      security:
+          - bearerAuth: []
+      parameters:
+       - in: path
+         name: id_admin
+         schema: 
+           type : integer
+         required: true
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type : object
+              required:
+                - "title"
+                - "price"
+                - "description"
+                - "weight"
+                - "stock"
+                - "id_categories"
+              properties:
+                title:
+                 type : string
+                price:
+                 type : integer
+                description:
+                 type: string
+                weight:
+                 type : number
+                stock:
+                 type : integer
+                id_categories:
+                 type : integer
+                files:
+                 type : string
+                 format: binary
+                 description : products image, can input more than 1 images
+      responses:
+        '201':
+          description : products created
+          content:
+           application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Success
+                   message : Success
+                   data : 
+
+        '400':
+          description : Failed create products
+          content:
+           application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Bad Request
+                   message : Internal server error
+                   data : 
+   /admins/{id_admin}/products/{id_products}:
+      put:
+        tags:
+         - Admins
+        summary: Admin update data products
+        security:
+          - bearerAuth: []
+        parameters:
+          - in : path
+            name : id_admin
+            schema:
+             type : integer
+            required : true
+          - in : path
+            name: id_products
+            schema:
+             type : integer
+            required: true
+        requestBody:
+          content:
+            multipart/form-data:
+              schema: 
+                type : object
+                properties:
+                 title: 
+                   type : string
+                 status:
+                   type: string
+                   enum:
+                    - "active"
+                    - 'non-active'
+                 price:
+                   type: integer
+                 description:
+                   type: string
+                 weight:
+                   type: number
+                 id_categories:
+                   type: integer
+        responses:
+          '200':
+            description : Success update data products
+            content:
+              application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Success
+                   message : Success
+                   data : 
+
+          '400':
+            description : Failed update data products
+            content:
+              application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Bad Request
+                   message : Internal server error
+                   data : 
       delete:
         tags:
-         - "Admins"
-        summary : Delete data admins
+         - Admins
+        summary: Admins delete data products
+        security:
+          - bearerAuth: []
+        parameters:
+          - in : path
+            name : id_admin
+            schema:
+             type : integer
+            required : true
+          - in : path
+            name: id_products
+            schema:
+             type : integer
+            required: true
+        responses:
+          '201':
+            description : products deleted
+            content:
+             application/json:
+                  schema:
+                    $ref : '#/components/schemas/Response'
+                  example:
+                    code : Success
+                    message : Success
+                    data : 
 
+          '400':
+            description : Failed delete products
+            content:
+             application/json:
+                  schema:
+                    $ref : '#/components/schemas/Response'
+                  example:
+                    code : Bad Request
+                    message : Internal server error
+                    data : 
+   /categories:
+     get:
+      tags:
+       - Categories
+      summary: Get All Parent Categories
+      security:
+          - bearerAuth: []
+      responses:
+        '200':
+          description : Success get all categories
+          content:
+            application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Success
+                   message : Success
+                   data : [
+                            {
+                                "ID": 5,
+                                "Name": "Shoes",
+                                "AdminID": 1,
+                                "Status": "active",
+                                "Parent_id": 0,
+                                "Count_child_categories": 1,
+                                "Created_at": "2021-10-29T10:18:08Z",
+                                "Updated_at": "0001-01-01T00:00:00Z",
+                                "Deleted_at": "0001-01-01T00:00:00Z"
+                            }
+                        ]            
+        '400':
+          description : Failed get all categories
+          content:
+            application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Bad Request
+                   message : Not Found
+                   data : 
+      parameters:
+        - in: query
+          name: query
+          required : false
+          schema: 
+            type : string 
+        - in: query
+          name: id_admin
+          required : false
+          schema: 
+            type : integer
+        - in: query
+          name: sort_name
+          required : false
+          schema: 
+            type : string 
+            enum:
+              - asc
+              - desc
+        - in: query
+          name: sort_date
+          required : false
+          schema: 
+            type : string
+            enum:
+              - asc
+              - desc
+        - in: query
+          name: page
+          required : false
+          schema: 
+            type : integer
+        - in: query
+          name: per_page
+          required : false
+          schema: 
+            type : integer     
+   /categories/{id_categories}:
+     get:
+      tags:
+       - Categories
+      summary: Get sub categories of parent categories
+      security:
+          - bearerAuth: []
+      parameters:
+        - in: path
+          name: id_categories
+          schema:
+            type : integer
+          required: true
+        - in: query
+          name: query
+          required : false
+          schema: 
+            type : string 
+        - in: query
+          name: id_admin
+          required : false
+          schema: 
+            type : integer
+        - in: query
+          name: sort_name
+          required : false
+          schema: 
+            type : string 
+            enum:
+              - asc
+              - desc
+        - in: query
+          name: sort_date
+          required : false
+          schema: 
+            type : string
+            enum:
+              - asc
+              - desc
+        - in: query
+          name: page
+          required : false
+          schema: 
+            type : integer
+        - in: query
+          name: per_page
+          required : false
+          schema: 
+            type : integer   
+      responses:
+        '200':
+          description : Success get data sub categories
+          content:
+           application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Bad Request
+                   message : Not Found
+                   data :  [
+                              {
+                                  "ID": 10,
+                                  "Name": "Under Armour",
+                                  "AdminID": 1,
+                                  "Status": "active",
+                                  "Parent_id": 5,
+                                  "Count_child_categories": 0,
+                                  "Created_at": "2021-10-29T10:21:56Z",
+                                  "Updated_at": "0001-01-01T00:00:00Z",
+                                  "Deleted_at": "0001-01-01T00:00:00Z"
+                              }
+                          ]
+           
+        '400':
+          description : Failed get data sub categories
+          content:
+            application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Bad Request
+                   message : Not Found
+                   data : 
+   /products/search:
+      get:
+       tags:
+        - Products
+       summary: Get data products
+       security:
+          - bearerAuth: []
+       parameters:
+        - in: query
+          name: query
+          required : false
+          schema: 
+            type : string 
+        - in: query
+          name: id_categories
+          required : false
+          schema: 
+            type : integer
+        - in: query
+          name: pmax
+          required : false
+          schema: 
+            type : integer
+        - in: query
+          name: pmin
+          required : false
+          schema: 
+            type : integer
+        - in: query
+          name: sort_price
+          required : false
+          schema: 
+            type : string 
+            enum:
+              - asc
+              - desc
+        - in: query
+          name: sort
+          required : false
+          schema: 
+            type : string
+            enum:
+              - asc
+              - desc
+        - in: query
+          name: page
+          required : false
+          schema: 
+            type : integer
+        - in: query
+          name: per_page
+          required : false
+          schema: 
+            type : integer
+       responses:
+         '200':
+           description : Success get all data products
+           content:
+              application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Bad Request
+                   message : Not Found
+                   data : [
+                    {
+                        "ID": 1,
+                        "Stock": 20,
+                        "Title": "Under Armour Evolution Shoes",
+                        "Price": 400000,
+                        "Description": "lorem ipsum",
+                        "Weight": 2.2,
+                        "Status": "active",
+                        "AdminID": 1,
+                        "CategoriesID": 10,
+                        "Created_at": "2021-10-29T10:38:29Z",
+                        "Updated_at": "0001-01-01T00:00:00Z",
+                        "Deleted_at": "0001-01-01T00:00:00Z",
+                        "Products_images": [
+                            {
+                                "ID": 1,
+                                "FileName": "1-28-38519.png",
+                                "Path": "https://alta-store-bucket.s3.ap-southeast-1.amazonaws.com/products-images/1-28-38519.png",
+                                "Products_ID": 1,
+                                "Created_at": "2021-10-29T10:38:29Z",
+                                "Updated_at": "0001-01-01T00:00:00Z",
+                                "Deleted_at": "0001-01-01T00:00:00Z"
+                            }
+                        ]
+                    },
+                    {
+                        "ID": 3,
+                        "Stock": 10,
+                        "Title": "Under Armour Monster 2012",
+                        "Price": 10000,
+                        "Description": "lorem ipsum",
+                        "Weight": 2.2,
+                        "Status": "active",
+                        "AdminID": 1,
+                        "CategoriesID": 10,
+                        "Created_at": "2021-10-29T10:40:58Z",
+                        "Updated_at": "0001-01-01T00:00:00Z",
+                        "Deleted_at": "0001-01-01T00:00:00Z",
+                        "Products_images": null
+                    }]
+         '400':
+           description : Failed get data products
+           content:
+            application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Bad Request
+                   message : Not Found
+                   data : 
+   /products/{id_products}:
+     get:
+       tags:
+        - Products
+       summary: Get data products by Id products
+       security:
+          - bearerAuth: []
+       parameters:
+        - in : path
+          name : id_products
+          schema:
+           type : integer
+          required : true
+       responses:
+         '200':
+           description : Success get data products by id products
+           content:
+             application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Success
+                   message : Success
+                   data :  {
+                        "ID": 1,
+                        "Stock": 20,
+                        "Title": "Under Armour Evolution Shoes",
+                        "Price": 400000,
+                        "Description": "lorem ipsum",
+                        "Weight": 2.2,
+                        "Status": "active",
+                        "AdminID": 1,
+                        "CategoriesID": 10,
+                        "Created_at": "2021-10-29T10:38:29Z",
+                        "Updated_at": "0001-01-01T00:00:00Z",
+                        "Deleted_at": "0001-01-01T00:00:00Z",
+                        "Products_images": [
+                            {
+                                "ID": 1,
+                                "FileName": "1-28-38519.png",
+                                "Path": "https://alta-store-bucket.s3.ap-southeast-1.amazonaws.com/products-images/1-28-38519.png",
+                                "Products_ID": 1,
+                                "Created_at": "2021-10-29T10:38:29Z",
+                                "Updated_at": "0001-01-01T00:00:00Z",
+                                "Deleted_at": "0001-01-01T00:00:00Z"
+                            }
+                        ]
+                    }
+         '400':
+           description : Data products Not Found
+           content:
+             application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Bad Request
+                   message : Not Found
+                   data : 
+   /products/{id_products}/products_images:
+     post:
+       tags:
+         - Products
+       summary: Admin add product images
+       security:
+          - bearerAuth: []
+       parameters:
+        - in : path
+          name : id_products
+          schema:
+           type : integer
+          required : true
+       responses:
+         '201':
+           description : Success add products images
+           content:
+               application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Success
+                   message : Success
+                   data : 
+         '400':
+           description : Failed add products images 
+           content:
+              application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Bad Request
+                   message : Not Found
+                   data : 
+       requestBody:
+         content:
+           multipart/form-data:
+             schema:
+               type : object
+               required:
+                 - "files"
+               properties:
+                 files:
+                   type : string
+                   format : binary
+                   description : products images files, can input more than 1
+   /products/{id_products}/products_images/{id_products_images}:
+     delete:
+       tags:
+        - Products
+       summary: Admins delete products images
+       security:
+          - bearerAuth: []
+       parameters:
+        - in : path
+          name : id_products
+          schema:
+           type : integer
+          required : true
+        - in : path
+          name : id_products_images
+          schema:
+           type : integer
+          required: true
+       responses:
+         '201':
+           description : Success delete products images
+           content:
+               application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Success
+                   message : Success
+                   data : 
+         '400':
+           description : Error While insert images 
+           content:
+              application/json:
+                 schema:
+                   $ref : '#/components/schemas/Response'
+                 example:
+                   code : Bad Request
+                   message : Not Found
+                   data :      
+          
+         
 components:
+   securitySchemes:
+     bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
    schemas:
     Response:
       type: object
@@ -51,6 +1010,3 @@ components:
         data:
           description: Data that client requested
           type: object
-         
-          
-      

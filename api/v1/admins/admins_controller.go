@@ -62,17 +62,7 @@ func (admin_service *Controller) CreateAdminController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
-	return c.JSON(common.NewSuccessResponseWithoutData())
-}
-
-func (admin_service *Controller) CreateMockAdminController(c echo.Context) error {
-	admin_spec := admins.AdminSpec{}
-	c.Bind(&admin_spec)
-	err := admin_service.adminService.InsertAdmin(admin_spec, -404)
-	if err != nil {
-		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
-	}
-	return c.JSON(common.NewSuccessResponseWithoutData())
+	return c.JSON(common.NewSuccessCreated())
 }
 
 func (admin_service *Controller) ModifyAdminController(c echo.Context) error {

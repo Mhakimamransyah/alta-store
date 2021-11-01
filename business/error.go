@@ -6,6 +6,9 @@ var (
 	//ErrInternalServerError Error caused by system error
 	ErrInternalServerError = errors.New("internal Server Error")
 
+	//ErrInternalServerError Error caused by system error
+	ErrAddProductsImages = errors.New("Erro while insert images")
+
 	//ErrHasBeenModified Error when update item that has been modified
 	ErrHasBeenModified = errors.New("data has been modified")
 

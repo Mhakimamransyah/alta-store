@@ -60,7 +60,7 @@ func (controller *Controller) CreateProductsController(c echo.Context) error {
 	}
 
 	// }
-	return c.JSON(common.NewSuccessResponseWithoutData())
+	return c.JSON(common.NewSuccessCreated())
 }
 
 func (controller *Controller) ModifyProductsController(c echo.Context) error {
@@ -164,5 +164,5 @@ func (controller *Controller) InsertNewProductsPictureController(c echo.Context)
 		return c.JSON(common.NewBadRequestResponseWithMessage(err.Error()))
 	}
 
-	return c.JSON(common.NewSuccessResponseWithoutData())
+	return c.JSON(common.NewSuccessCreated())
 }

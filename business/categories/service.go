@@ -27,7 +27,7 @@ type CategoriesSpec struct {
 }
 
 type CategoriesUpdatable struct {
-	Name   string `form:"name" validate:"required,max=20"`
+	Name   string `form:"name" validate:"max=20"`
 	Status string `form:"status"`
 }
 

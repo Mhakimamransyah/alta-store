@@ -54,7 +54,7 @@ func TestInsertNewImages(t *testing.T) {
 			created_by_id,
 		).Return(business.ErrInternalServerError).Once()
 		err := productsImagesService.InsertNewImages(&productsImagesData, listImagesFile, created_by_id)
-		assert.Nil(t, err)
+		assert.NotNil(t, err)
 	})
 }
 
