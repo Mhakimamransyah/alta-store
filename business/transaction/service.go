@@ -183,7 +183,6 @@ func (s *service) GetAllTransaction(userID uint) ([]*CheckoutResponse, error) {
 	}
 
 	listTransaction, _ := s.repository.FindAllTransaction(cartID)
-
 	for _, value := range listTransaction {
 		trx, _ := s.FindTransactionByInvoice(value.InvoiceNumber, userID)
 		transactions = append(transactions, trx)

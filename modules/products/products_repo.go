@@ -5,7 +5,6 @@ import (
 	"altaStore/modules/admins"
 	"altaStore/modules/categories"
 	"errors"
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -178,10 +177,8 @@ func (repository *GormRepository) UpdateStocks(id_products, value int, operation
 
 	currentStocks := products.Stock
 	if operation == "add" {
-		fmt.Println("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
 		currentStocks = currentStocks + value
 	} else {
-		fmt.Println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
 		currentStocks = currentStocks - value
 		if currentStocks < 0 {
 			return errors.New("stock exceeds the minimum limit")

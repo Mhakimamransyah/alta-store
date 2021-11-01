@@ -37,9 +37,9 @@ type ProductsUpdatable struct {
 	Price        int     `form:"price"`
 	Description  string  `form:"description" validate:"max=200"`
 	Stock        int     `form:"stock"`
-	Status       string  `form:"status"`
+	Status       string  `form:"status" validate:"max=10"`
 	Weight       float64 `form:"weight"`
-	CategoriesID int     `form:"id_categories" validate:"required"`
+	CategoriesID int     `form:"id_categories"`
 }
 
 func InitProductsService(products_repo Repository, products_img_repo productsimages.Repository) *service {
