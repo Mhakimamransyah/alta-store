@@ -4,12 +4,14 @@ Alta store RESTful API to serve altastore online web store. This code use clean 
 #### :alien: Technologies stacks
 1. Go 
 1. Echo Golang
+1. Mockery
 1. JWT
 1. MySql
 1. Docker
 1. AWS EC2
 1. AWS S3
 1. AWS RDS
+1. Github Actions
 
 
 ## :computer: System Design
